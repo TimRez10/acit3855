@@ -1,11 +1,11 @@
 version: 1
 datastore:
-  user: user
-  password: password
-  hostname: ec2-54-159-88-245.compute-1.amazonaws.com
+  user: 
+  password: 
+  hostname: localhost
   port: 3306
   db: events
 events:
-  hostname: ec2-54-159-88-245.compute-1.amazonaws.com
+  hostname: localhost
   port: 9092
   topic: events
