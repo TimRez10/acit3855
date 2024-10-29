@@ -1,0 +1,100 @@
+openapi: 3.0.0
+info:
+  title: Vending Machine API
+  description: This is an application for tracking various vending machines in Vancouver
+  contact:
+    email: treziapov@my.bcit.ca
+  version: 1.0.0
+servers:
+- url: /
+tags:
+- name: vending_machine
+  description: Operations available to vending machines
+paths:
+  /dispenses:
+    post:
+      tags:
+      - vending_machine
+      summary: adds a record for dispensed items
+      description: Adds a new record for dispensed items to the system
+      operationId: app.add_dispense_record
+      requestBody:
+        description: Dispense record to add
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DispenseItem'
+      responses:
+        "201":
+          description: item created
+        "400":
+          description: "invalid input, object invalid"
+  /refills:
+    post:
+      tags:
+      - vending_machine
+      summary: adds a record for refilled items
+      description: Adds a new record for refilled items to the system
+      operationId: app.add_refill_record
+      requestBody:
+        description: Refill record to add
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefillItem'
+      responses:
+        "201":
+          description: item created
+        "400":
+          description: "invalid input, object invalid"
+components:
+  schemas:
+    DispenseItem:
+      required:
+      - amount_paid
+      - payment_method
+      - item_id
+      - transaction_time
+      - vending_machine_id
+      type: object
+      properties:
+        vending_machine_id:
+          type: string
+          format: uuid
+        amount_paid:
+          type: number
+          example: 2.5
+        payment_method:
+          type: string
+          example: cash
+        transaction_time:
+          type: string
+          format: date-time
+        item_id:
+          type: integer
+          example: 4033
+    RefillItem:
+      required:
+      - item_id
+      - item_quantity
+      - refill_time
+      - staff_name
+      - vending_machine_id
+      type: object
+      properties:
+        vending_machine_id:
+          type: string
+          format: uuid
+        staff_name:
+          type: string
+          example: John Doe
+        refill_time:
+          type: string
+          format: date-time
+        item_id:
+          type: number
+          example: 4012
+        item_quantity:
+          type: number
+          example: 3
+        

@@ -1,0 +1,54 @@
+openapi: 3.0.0
+info:
+  title: Vending Machine API
+  description: This is an application for tracking various vending machines in Vancouver
+  contact:
+    email: treziapov@my.bcit.ca
+  version: 1.0.0
+
+paths:
+  /stats:
+    get:
+      summary: Gets the event stats
+      operationId: app.get_stats
+      description: Gets dispenses and refills processsed statistics
+      responses:
+        '200':
+          description: Successfully returned a list of stats
+          content: 
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/ReadingStats'
+        '400':
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+components:
+  schemas:
+    ReadingStats:
+      required:
+      - num_dispense_records
+      - max_dispense_amount_paid
+      - num_refill_records
+      - max_refill_quantity
+      properties:
+        num_dispense_records:
+          type: integer
+          example: 5000
+        max_dispense_price:
+          type: integer
+          example: 200
+        num_refill_records:
+          type: integer
+          example: 1800
+        max_refill_quantity:
+          type: integer
+          example: 200

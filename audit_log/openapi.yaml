@@ -1,0 +1,152 @@
+openapi: 3.0.0
+info:
+  description: This API provides analyzer info
+  version: "1.0.0"
+  title: Analyzer API
+  contact:
+    email: treziapov@bcit.ca
+
+paths:
+  /refills:
+    get:
+      summary: gets a record for refilled items from history
+      operationId: app.get_refill_record
+      description: Gets refill records from the event store
+      parameters:
+        - name: index
+          in: query
+          description: Gets the refill at the index in the event store
+          schema:
+            type: integer
+            example: 100
+      responses:
+        '200':
+          description: Successfully returned a refill event
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefillItem'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /dispenses:
+    get:
+      summary: gets a dispense record g from history
+      operationId: app.get_dispense_record
+      description: Gets dispense reading from the event store
+      parameters:
+        - name: index
+          in: query
+          description: Gets the dispense at the index in the event store
+          schema:
+            type: integer
+            example: 100
+      responses:
+        '200':
+          description: Successfully returned a dispense event
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DispenseItem'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: Not Found
+
+  /stats:
+    get:
+      summary: gets the event stats
+      operationId: app.get_event_stats
+      description: Gets the stats of the history events
+      responses:
+        '200':
+          description: Successfully returned a heart rate event
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stats'
+
+components:
+  schemas:
+    DispenseItem:
+      required:
+      - amount_paid
+      - payment_method
+      - item_id
+      - transaction_time
+      - vending_machine_id
+      type: object
+      properties:
+        vending_machine_id:
+          type: string
+          format: uuid
+        amount_paid:
+          type: number
+          example: 2.5
+        payment_method:
+          type: string
+          example: cash
+        transaction_time:
+          type: string
+          format: date-time
+        item_id:
+          type: integer
+          example: 4033
+    RefillItem:
+      required:
+      - item_id
+      - item_quantity
+      - refill_time
+      - staff_name
+      - vending_machine_id
+      type: object
+      properties:
+        vending_machine_id:
+          type: string
+          format: uuid
+        staff_name:
+          type: string
+          example: John Doe
+        refill_time:
+          type: string
+          format: date-time
+        item_id:
+          type: number
+          example: 4012
+        item_quantity:
+          type: number
+          example: 3
+    Stats:
+      required:
+      - num_dispense
+      - num_refill
+      properties:
+        num_dispense:
+          type: integer
+          example: 100
+        num_refill:
+          type: integer
+          example: 100

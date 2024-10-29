@@ -1,0 +1,9 @@
+version: 1
+refillstore:
+  url: http://localhost:8090/refills
+dispensestore:
+  url: http://localhost:8090/dispenses
+events:
+  hostname: ec2-54-159-88-245.compute-1.amazonaws.com
+  port: 9092
+  topic: events
