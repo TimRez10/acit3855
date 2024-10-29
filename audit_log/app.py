@@ -77,7 +77,7 @@ def get_event_stats():
             msg_str = msg.value.decode('utf-8')
             msg = json.loads(msg_str)
             stats[msg['type']] += 1
-        return json.dumps({'num_dispense': stats['dispense'], 'num_refill': stats['refill']}), 200
+        return {'num_dispense': stats['dispense'], 'num_refill': stats['refill']}, 200
     except:
         logger.error("No stats found")
         pass
