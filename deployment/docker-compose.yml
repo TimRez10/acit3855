@@ -39,7 +39,7 @@ services:
     volumes:
       - my-db:/var/lib/mysql
     env_file:
-      - ./.env
+      - .env
 
   receiver:
     build:
@@ -50,7 +50,7 @@ services:
     depends_on:
       - kafka
     env_file:
-      - ./.env
+      - .env
 
   storage:
     build:
@@ -62,7 +62,7 @@ services:
       - kafka
       - db
     env_file:
-      - ./.env
+      - .env
 
   processing:
     build:
@@ -74,7 +74,7 @@ services:
     depends_on:
       - storage
     env_file:
-      - ./.env
+      - .env
 
   analyzer:
     build:
@@ -85,7 +85,7 @@ services:
     depends_on:
       - kafka
     env_file:
-      - ./env
+      - .env
 
 
 
