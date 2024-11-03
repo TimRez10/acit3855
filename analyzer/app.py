@@ -88,4 +88,4 @@ app = connexion.FlaskApp(__name__, specification_dir='')
 app.add_api("openapi.yaml", strict_validation=True, validate_responses=True)
 if __name__ == "__main__":
     logger.info("running on http://localhost:8110/ui")
-    app.run(port=8110)
+    app.run(host="0.0.0.0", port=8080)
