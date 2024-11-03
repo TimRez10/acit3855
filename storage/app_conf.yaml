@@ -1,7 +1,7 @@
 version: 1
 datastore:
   user: user
-  password: 
+  password: Shirt-Rabid1-Blurb
   hostname: ec2-54-210-168-210.compute-1.amazonaws.com
   port: 3306
   db: events
