@@ -40,7 +40,7 @@ def populate_stats():
         dispense_event = requests.get(dispense_url)
     except Exception as e:
         logger.error(f"{e}")
-
+    
     if dispense_event.status_code == 200:
         logger.info(f"dispenses: Received {len(dispense_event.json())} events.")
     else:
@@ -53,7 +53,6 @@ def populate_stats():
         refill_event = requests.get(refill_url)
     except Exception as e:
         logger.error(f"{e}")
-
 
     if refill_event.status_code == 200:
         logger.info(f"refills: Received {len(refill_event.json())} events.")

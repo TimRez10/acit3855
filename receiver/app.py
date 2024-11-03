@@ -56,6 +56,7 @@ def add_dispense_record(body):
         client = KafkaClient(hosts=hostname)
     except Exception as e:
         logger.error(f"{e}")
+        return e, 400
     logger.debug(f'Connected to Kafka client on {hostname}')
 
     topic = client.topics[str.encode(app_config["events"]["topic"])]
@@ -101,6 +102,7 @@ def add_refill_record(body):
         client = KafkaClient(hosts=hostname)
     except Exception as e:
         logger.error(f"{e}")
+        return e, 400
     logger.debug(f'Connected to Kafka client on {hostname}')
     
     topic = client.topics[str.encode(app_config["events"]["topic"])]

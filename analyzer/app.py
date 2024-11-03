@@ -26,6 +26,7 @@ def get_refill_record(index):
         client = KafkaClient(hosts=hostname)
     except Exception as e:
         logger.error(f"{e}")
+        return e, 400
     topic = client.topics[str.encode(app_config["events"]["topic"])]
     consumer = topic.get_simple_consumer(reset_offset_on_start=True,
     consumer_timeout_ms=1000)
@@ -52,6 +53,7 @@ def get_dispense_record(index):
         client = KafkaClient(hosts=hostname)
     except Exception as e:
         logger.error(f"{e}")
+        return e, 400
     topic = client.topics[str.encode(app_config["events"]["topic"])]
     consumer = topic.get_simple_consumer(reset_offset_on_start=True,
     consumer_timeout_ms=1000)
@@ -77,6 +79,7 @@ def get_event_stats():
         client = KafkaClient(hosts=hostname)
     except Exception as e:
         logger.error(f"{e}")
+        return e, 400
     topic = client.topics[str.encode(app_config["events"]["topic"])]
     consumer = topic.get_simple_consumer(reset_offset_on_start=True,
     consumer_timeout_ms=1000)
