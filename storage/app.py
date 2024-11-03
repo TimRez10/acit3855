@@ -1,6 +1,6 @@
 import connexion
 from connexion import NoContent
-
+from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from base import Base
@@ -14,9 +14,17 @@ import datetime
 import logging
 import logging.config
 import yaml
+import os
+
+load_dotenv()
 
 with open('app_conf.yaml', 'r') as f:
     app_config = yaml.safe_load(f.read())
+    app_config["events"]["hostname"] = os.getenv("KAFKA_HOST_NAME")
+    app_config["datastore"]["hostname"] = os.getenv("KAFKA_HOST_NAME")
+    app_config["datastore"]["user"] = os.getenv("MYSQL_USER")
+    app_config["datastore"]["password"] = os.getenv("MYSQL_PASSWORD")
+
 
 with open('log_conf.yaml', 'r') as f:
     log_config = yaml.safe_load(f.read())

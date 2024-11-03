@@ -1,16 +1,20 @@
 import connexion
 from connexion import NoContent
-import requests
+from dotenv import load_dotenv
 import json
 import yaml
 import logging
 import logging.config
 import uuid
 import datetime
+import os
 from pykafka import KafkaClient 
+
+load_dotenv()
 
 with open('app_conf.yaml', 'r') as f:
     app_config = yaml.safe_load(f.read())
+    app_config["events"]["hostname"] = os.getenv("KAFKA_HOST_NAME")
 
 with open('log_conf.yaml', 'r') as f:
     log_config = yaml.safe_load(f.read())
@@ -19,34 +23,7 @@ with open('log_conf.yaml', 'r') as f:
 logger = logging.getLogger('basicLogger')
 hostname = "%s:%d" % (app_config["events"]["hostname"], app_config["events"]["port"])
 
-# def create_events_file():
-#     with open(EVENT_FILE, "w") as events:
-#         data_fields =   {"count_dr":0,
-#                             "recent_dr":[],
-#                             "count_rr":0,
-#                             "recent_rr":[]
-#                         }
-#         test = json.dumps(data_fields)
-#         events.write(test)
-#     return None
-
-
 def add_dispense_record(body):
-    # if not os.path.isfile(EVENT_FILE):
-    #     create_events_file()
-
-    # with open(EVENT_FILE, "r") as events:
-    #     data = json.load(events)
-
-    # data["count_dr"] += 1
-    # message = {"msg_data":f"Vending Machine {body['vending_machine_id']} dispensed item ID {body['item_id']}. Payment of {body['amount_paid']:.2f}$ with payment method '{body['payment_method']}' at {body['transaction_time']}.",
-    #            "received_timestamp": str(datetime.datetime.now())}
-    # data["recent_dr"].insert(0, message)
-    # if len(data["recent_dr"]) > MAX_EVENTS:
-    #     data["recent_dr"].pop(-1)
-    # with open(EVENT_FILE, "w") as events:
-    #     json.dump(data, events)
-
     trace_id = str(uuid.uuid4())
     logger.info(f"Received event add_dispense_record request with a trace id of {trace_id}")
     body["trace_id"] = trace_id
@@ -76,23 +53,6 @@ def add_dispense_record(body):
 
 
 def add_refill_record(body):
-    # if not os.path.isfile(EVENT_FILE):
-    #     create_events_file()
-
-    # with open(EVENT_FILE, "r") as events:
-    #     data = json.load(events)
-
-    # data["count_rr"] += 1
-    # message = {"msg_data":f"Vending Machine {body['vending_machine_id']} refilled with {body['item_quantity']} of item ID {body['item_id']}. Refilled by {body['staff_name']} at {body['refill_time']}.",
-    #             "received_timestamp": str(datetime.datetime.now())}
-    
-    # data["recent_rr"].insert(0, message)
-    # if len(data["recent_rr"]) > MAX_EVENTS:
-    #     data["recent_rr"].pop(-1)
-    
-    # with open(EVENT_FILE, "w") as events:
-    #     json.dump(data, events)
-
     trace_id=str(uuid.uuid4())
     logger.info(f"Received event add_refill_record request with a trace id of {trace_id}")
     body["trace_id"] = trace_id

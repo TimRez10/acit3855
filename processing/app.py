@@ -1,5 +1,4 @@
 import connexion
-from connexion import NoContent
 import requests
 import json
 import yaml
