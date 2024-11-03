@@ -34,8 +34,12 @@ def populate_stats():
     current_time = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
 
     dispense_url = f"{app_config['eventstore']['url']}/dispenses?end_timestamp={current_time}&start_timestamp={data['last_updated']}"
-    logger.debug(f"Calling GET to /dispenses")
-    dispense_event = requests.get(dispense_url)
+
+    try:
+        logger.debug(f"Calling GET to /dispenses")
+        dispense_event = requests.get(dispense_url)
+    except Exception as e:
+        logger.error(f"{e}")
 
     if dispense_event.status_code == 200:
         logger.info(f"dispenses: Received {len(dispense_event.json())} events.")
@@ -43,8 +47,13 @@ def populate_stats():
         logger.error(f"dispenses: Response code is not 200. Response code is {dispense_event.status_code}.")
     
     refill_url = f"{app_config['eventstore']['url']}/refills?end_timestamp={current_time}&start_timestamp={data['last_updated']}"
-    logger.debug(f"Calling GET to /refills")
-    refill_event = requests.get(refill_url)
+
+    try:
+        logger.debug(f"Calling GET to /refills")
+        refill_event = requests.get(refill_url)
+    except Exception as e:
+        logger.error(f"{e}")
+
 
     if refill_event.status_code == 200:
         logger.info(f"refills: Received {len(refill_event.json())} events.")
