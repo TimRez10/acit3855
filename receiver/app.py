@@ -17,6 +17,7 @@ with open('log_conf.yaml', 'r') as f:
     logging.config.dictConfig(log_config)
 
 logger = logging.getLogger('basicLogger')
+hostname = "%s:%d" % (app_config["events"]["hostname"], app_config["events"]["port"])
 
 # def create_events_file():
 #     with open(EVENT_FILE, "w") as events:
@@ -48,12 +49,15 @@ def add_dispense_record(body):
 
     trace_id = str(uuid.uuid4())
     logger.info(f"Received event add_dispense_record request with a trace id of {trace_id}")
-
-    header={"Content-Type": "application/json"}
     body["trace_id"] = trace_id
-    
-    #event = requests.post(app_config["dispensestore"]["url"], data=json.dumps(body), headers=header)
-    client = KafkaClient(hosts=f'{app_config["events"]["hostname"]}:{app_config["events"]["port"]}')
+
+    try:
+        logger.info("Attempting to connect to Kafka at %s", hostname)
+        client = KafkaClient(hosts=hostname)
+    except Exception as e:
+        logger.error(f"{e}")
+    logger.debug(f'Connected to Kafka client on {hostname}')
+
     topic = client.topics[str.encode(app_config["events"]["topic"])]
     producer = topic.get_sync_producer()
     msg = { 
@@ -90,13 +94,14 @@ def add_refill_record(body):
 
     trace_id=str(uuid.uuid4())
     logger.info(f"Received event add_refill_record request with a trace id of {trace_id}")
-
-    header={"content-type": "application/json"}
     body["trace_id"] = trace_id
     
-    #event = requests.post(app_config["refillstore"]["url"], data=json.dumps(body), headers=header)
-    client = KafkaClient(hosts=f'{app_config["events"]["hostname"]}:{app_config["events"]["port"]}')
-    logger.debug(f'Connected to Kafka client on {app_config["events"]["hostname"]}:{app_config["events"]["port"]}')
+    try:
+        logger.info("Attempting to connect to Kafka at %s", hostname)
+        client = KafkaClient(hosts=hostname)
+    except Exception as e:
+        logger.error(f"{e}")
+    logger.debug(f'Connected to Kafka client on {hostname}')
     
     topic = client.topics[str.encode(app_config["events"]["topic"])]
     producer = topic.get_sync_producer()

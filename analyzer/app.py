@@ -21,12 +21,14 @@ hostname = "%s:%d" % (app_config["events"]["hostname"], app_config["events"]["po
 
 def get_refill_record(index):
     """ Get refill record in History """
-    logger.debug("Attempting to connect to Kafka at %s", hostname)
-    client = KafkaClient(hosts=hostname)
+    try:
+        logger.info("Attempting to connect to Kafka at %s", hostname)
+        client = KafkaClient(hosts=hostname)
+    except Exception as e:
+        logger.error(f"{e}")
     topic = client.topics[str.encode(app_config["events"]["topic"])]
     consumer = topic.get_simple_consumer(reset_offset_on_start=True,
     consumer_timeout_ms=1000)
-    logger.debug("Connected to Kafka at %s", hostname)
     logger.info("Retrieving BP at index %d" % index)
     try:
         events = []
@@ -45,12 +47,14 @@ def get_refill_record(index):
 
 def get_dispense_record(index):
     """ Get dispense record in History """
-    logger.debug("Attempting to connect to Kafka at %s", hostname)
-    client = KafkaClient(hosts=hostname)
+    try:
+        logger.info("Attempting to connect to Kafka at %s", hostname)
+        client = KafkaClient(hosts=hostname)
+    except Exception as e:
+        logger.error(f"{e}")
     topic = client.topics[str.encode(app_config["events"]["topic"])]
     consumer = topic.get_simple_consumer(reset_offset_on_start=True,
     consumer_timeout_ms=1000)
-    logger.debug("Connected to Kafka at %s", hostname)
     logger.info("Retrieving dispense at index %d" % index)
     try:
         events = []
@@ -68,8 +72,11 @@ def get_dispense_record(index):
 
 def get_event_stats():
     """ Get stats in History """
-    logger.debug("Attempting to connect to Kafka at %s", hostname)
-    client = KafkaClient(hosts=hostname)
+    try:
+        logger.info("Attempting to connect to Kafka at %s", hostname)
+        client = KafkaClient(hosts=hostname)
+    except Exception as e:
+        logger.error(f"{e}")
     topic = client.topics[str.encode(app_config["events"]["topic"])]
     consumer = topic.get_simple_consumer(reset_offset_on_start=True,
     consumer_timeout_ms=1000)
