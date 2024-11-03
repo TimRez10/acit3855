@@ -1,6 +1,6 @@
 version: 1
 datastore:
-  user: user
+  user: 
   password: 
   hostname: ec2-54-210-168-210.compute-1.amazonaws.com
   port: 3306
