@@ -131,7 +131,9 @@ def get_dispense_record(start_timestamp, end_timestamp):
 def process_messages():
     """ Process event messages """
     hostname = "%s:%d" % (app_config["events"]["hostname"], app_config["events"]["port"])
+    logger.info("Attempting to connect to Kafka at %s", hostname)
     client = KafkaClient(hosts=hostname)
+    logger.info("Connected to Kafka at %s", hostname)
     topic = client.topics[str.encode(app_config["events"]["topic"])]
     consumer = topic.get_simple_consumer(
         consumer_group=b'event_group',
@@ -158,4 +160,4 @@ if __name__ == "__main__":
     t1 = Thread(target=process_messages)
     t1.setDaemon(True)
     t1.start()
-    app.run(host="0.0.0.0", port=8080)
+    app.run(host="0.0.0.0", port=8090)
