@@ -20,8 +20,8 @@ load_dotenv()
 
 with open('app_conf.yaml', 'r') as f:
     app_config = yaml.safe_load(f.read())
-    app_config["events"]["hostname"] = os.getenv("KAFKA_HOST_NAME")
-    app_config["datastore"]["hostname"] = os.getenv("KAFKA_HOST_NAME")
+    app_config["events"]["hostname"] = os.getenv("HOST_NAME")
+    app_config["datastore"]["hostname"] = os.getenv("HOST_NAME")
     app_config["datastore"]["user"] = os.getenv("MYSQL_USER")
     app_config["datastore"]["password"] = os.getenv("MYSQL_PASSWORD")
 
@@ -114,13 +114,12 @@ def get_dispense_record(start_timestamp, end_timestamp):
 
 def process_messages():
     """ Process event messages """
-    logger.info("Attempting to connect to Kafka at %s", hostname)
     try:
-        logger.info("Attempting to connect to Kafka at %s", hostname)
+        logger.debug("Attempting to connect to Kafka at %s", hostname)
         client = KafkaClient(hosts=hostname)
     except Exception as e:
         logger.error(f"{e}")
-    logger.info("Connected to Kafka at %s", hostname)
+    logger.debug("Connected to Kafka at %s", hostname)
     topic = client.topics[str.encode(app_config["events"]["topic"])]
     consumer = topic.get_simple_consumer(
         consumer_group=b'event_group',

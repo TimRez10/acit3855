@@ -14,7 +14,7 @@ load_dotenv()
 
 with open('app_conf.yaml', 'r') as f:
     app_config = yaml.safe_load(f.read())
-    app_config["events"]["hostname"] = os.getenv("KAFKA_HOST_NAME")
+    app_config["events"]["hostname"] = os.getenv("HOST_NAME")
 
 with open('log_conf.yaml', 'r') as f:
     log_config = yaml.safe_load(f.read())
@@ -29,7 +29,7 @@ def add_dispense_record(body):
     body["trace_id"] = trace_id
 
     try:
-        logger.info("Attempting to connect to Kafka at %s", hostname)
+        logger.debug("Attempting to connect to Kafka at %s", hostname)
         client = KafkaClient(hosts=hostname)
     except Exception as e:
         logger.error(f"{e}")
@@ -58,7 +58,7 @@ def add_refill_record(body):
     body["trace_id"] = trace_id
     
     try:
-        logger.info("Attempting to connect to Kafka at %s", hostname)
+        logger.debug("Attempting to connect to Kafka at %s", hostname)
         client = KafkaClient(hosts=hostname)
     except Exception as e:
         logger.error(f"{e}")
