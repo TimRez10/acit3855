@@ -1,7 +1,7 @@
 import connexion
 from connexion import NoContent
 from dotenv import load_dotenv
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect
 from sqlalchemy.orm import sessionmaker
 from base import Base
 from dispenses import DispenseItem
@@ -81,6 +81,12 @@ def get_refill_record(start_timestamp, end_timestamp):
     """ Gets new refill record between the start and end timestamps """
     session = DB_SESSION()
 
+    inspector = inspect(session.bind)
+    if not inspector.has_table("refills"):
+        logger.warning("The 'refills' table does not exist in the database.")
+        session.close()
+        return NoContent, 404
+
     start_timestamp_datetime = datetime.datetime.strptime(start_timestamp, "%Y-%m-%dT%H:%M:%S")
     end_timestamp_datetime = datetime.datetime.strptime(end_timestamp, "%Y-%m-%dT%H:%M:%S")
 
@@ -98,6 +104,12 @@ def get_refill_record(start_timestamp, end_timestamp):
 def get_dispense_record(start_timestamp, end_timestamp):
     """ Gets new dispense record between the start and end timestamps """
     session = DB_SESSION()
+
+    inspector = inspect(session.bind)
+    if not inspector.has_table("dispenses"):
+        logger.warning("The 'dispenses' table does not exist in the database.")
+        session.close()
+        return NoContent, 404
 
     start_timestamp_datetime = datetime.datetime.strptime(start_timestamp, "%Y-%m-%dT%H:%M:%S")
     end_timestamp_datetime = datetime.datetime.strptime(end_timestamp, "%Y-%m-%dT%H:%M:%S")
