@@ -2,11 +2,12 @@ import logo from './logo.png';
 import './App.css';
 
 import EndpointAnalyzer from './components/EndpointAnalyzer'
+import EndpointAnalyzerStats from './components/EndpointAnalyzerStats'
 import AppStats from './components/AppStats'
 
 function App() {
 
-    const endpoints = ["refills", "dispenses", "stats"]
+    const endpoints = ["refills", "dispenses"]
 
     const rendered_endpoints = endpoints.map((endpoint) => {
         return <EndpointAnalyzer key={endpoint} endpoint={endpoint}/>
@@ -19,6 +20,8 @@ function App() {
                 <AppStats/>
                 <h1>Analyzer Endpoints</h1>
                 {rendered_endpoints}
+                <h3>Analyzer Stats</h3>
+                <EndpointAnalyzerStats/>
             </div>
         </div>
     );

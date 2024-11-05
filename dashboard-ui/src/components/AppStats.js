@@ -46,7 +46,7 @@ export default function AppStats() {
 							<td colspan="2">Highest Payment: ${stats['max_dispense_amount_paid']}</td>
 						</tr>
 						<tr>
-							<td colspan="2">Most Items Refilled: {stats['max_bp_dia_reading']}</td>
+							<td colspan="2">Most Items Refilled: {stats['max_refill_quantity']}</td>
 						</tr>
 					</tbody>
                 </table>

@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react'
 import '../App.css';
 
-export default function EndpointAnalyzer(props) {
+export default function EndpointAnalyzerStats() {
     const [isLoaded, setIsLoaded] = useState(false);
     const [log, setLog] = useState(null);
     const [error, setError] = useState(null)
-	const rand_val = Math.floor(Math.random() * 30); // Get a random event from the event store
+	const rand_val = Math.floor(Math.random() * 10); // Get a random event from the event store
 
     const getAnalyzer = () => {
-        fetch(`http://ec2-3-86-233-230.compute-1.amazonaws.com:8110/${props.endpoint}?index=${rand_val}`)
+        fetch(`http://ec2-3-86-233-230.compute-1.amazonaws.com:8110/stats`)
             .then(res => res.json())
             .then((result)=>{
-				console.log("Received Analyzer Results for " + props.endpoint)
+				console.log("Received Analyzer Stats")
                 setLog(result);
                 setIsLoaded(true);
             },(error) =>{
@@ -32,7 +32,6 @@ export default function EndpointAnalyzer(props) {
         
         return (
             <div>
-                <h3>{props.endpoint}-{rand_val}</h3>
                 {JSON.stringify(log)}
             </div>
         )
