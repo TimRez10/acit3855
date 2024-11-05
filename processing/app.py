@@ -52,6 +52,7 @@ def populate_stats():
         refill_event = requests.get(refill_url)
     except Exception as e:
         logger.error(f"{e}")
+        return e, 404
 
     if refill_event.status_code == 200:
         logger.info(f"refills: Received {len(refill_event.json())} events.")
@@ -71,6 +72,7 @@ def populate_stats():
         data['last_updated'] = current_time
     except Exception as e:
         logger.error(f"{e}")
+        return e, 404
 
     with open(app_config['datastore']['filename'], "w") as events:
         json.dump(data, events)
