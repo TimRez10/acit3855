@@ -87,8 +87,15 @@ services:
     env_file:
       - .env
 
-
-
+  dashboard:
+    build:
+      context: ../dashboard-ui
+    # image: deployment-dashboard
+    ports:
+    - "3000:3000"
+    depends_on:
+    - "processing"
+    - "analyzer"
 
 
 
