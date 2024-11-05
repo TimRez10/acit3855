@@ -35,8 +35,8 @@ export default function AppStats() {
                 <table className={"StatsTable"}>
 					<tbody>
 						<tr>
-							<th>Blood Pressure</th>
-							<th>Heart Rate</th>
+							<th>Dispenses</th>
+							<th>Refills</th>
 						</tr>
 						<tr>
 							<td># Dispenses: {stats['num_dispense_records']}</td>
