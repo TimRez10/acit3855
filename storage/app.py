@@ -1,7 +1,7 @@
 import connexion
 from connexion import NoContent
 from dotenv import load_dotenv
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect
 from sqlalchemy.orm import sessionmaker
 from base import Base
 from dispenses import DispenseItem
@@ -20,8 +20,8 @@ load_dotenv()
 
 with open('app_conf.yaml', 'r') as f:
     app_config = yaml.safe_load(f.read())
-    app_config["events"]["hostname"] = os.getenv("KAFKA_HOST_NAME")
-    app_config["datastore"]["hostname"] = os.getenv("KAFKA_HOST_NAME")
+    app_config["events"]["hostname"] = os.getenv("HOST_NAME")
+    app_config["datastore"]["hostname"] = os.getenv("HOST_NAME")
     app_config["datastore"]["user"] = os.getenv("MYSQL_USER")
     app_config["datastore"]["password"] = os.getenv("MYSQL_PASSWORD")
 
@@ -81,6 +81,12 @@ def get_refill_record(start_timestamp, end_timestamp):
     """ Gets new refill record between the start and end timestamps """
     session = DB_SESSION()
 
+    inspector = inspect(session.bind)
+    if not inspector.has_table("refills"):
+        logger.warning("The 'refills' table does not exist in the database.")
+        session.close()
+        return NoContent, 404
+
     start_timestamp_datetime = datetime.datetime.strptime(start_timestamp, "%Y-%m-%dT%H:%M:%S")
     end_timestamp_datetime = datetime.datetime.strptime(end_timestamp, "%Y-%m-%dT%H:%M:%S")
 
@@ -99,6 +105,12 @@ def get_dispense_record(start_timestamp, end_timestamp):
     """ Gets new dispense record between the start and end timestamps """
     session = DB_SESSION()
 
+    inspector = inspect(session.bind)
+    if not inspector.has_table("dispenses"):
+        logger.warning("The 'dispenses' table does not exist in the database.")
+        session.close()
+        return NoContent, 404
+
     start_timestamp_datetime = datetime.datetime.strptime(start_timestamp, "%Y-%m-%dT%H:%M:%S")
     end_timestamp_datetime = datetime.datetime.strptime(end_timestamp, "%Y-%m-%dT%H:%M:%S")
 
@@ -114,13 +126,12 @@ def get_dispense_record(start_timestamp, end_timestamp):
 
 def process_messages():
     """ Process event messages """
-    logger.info("Attempting to connect to Kafka at %s", hostname)
     try:
-        logger.info("Attempting to connect to Kafka at %s", hostname)
+        logger.debug("Attempting to connect to Kafka at %s", hostname)
         client = KafkaClient(hosts=hostname)
     except Exception as e:
         logger.error(f"{e}")
-    logger.info("Connected to Kafka at %s", hostname)
+    logger.debug("Connected to Kafka at %s", hostname)
     topic = client.topics[str.encode(app_config["events"]["topic"])]
     consumer = topic.get_simple_consumer(
         consumer_group=b'event_group',

@@ -12,7 +12,7 @@ load_dotenv()
 
 with open('app_conf.yaml', 'r') as f:
     app_config = yaml.safe_load(f.read())
-    app_config["events"]["hostname"] = os.getenv("KAFKA_HOST_NAME")
+    app_config["events"]["hostname"] = os.getenv("HOST_NAME")
 
 with open('log_conf.yaml', 'r') as f:
     log_config = yaml.safe_load(f.read())
@@ -24,7 +24,7 @@ hostname = "%s:%d" % (app_config["events"]["hostname"], app_config["events"]["po
 def get_refill_record(index):
     """ Get refill record in History """
     try:
-        logger.info("Attempting to connect to Kafka at %s", hostname)
+        logger.debug("Attempting to connect to Kafka at %s", hostname)
         client = KafkaClient(hosts=hostname)
     except Exception as e:
         logger.error(f"{e}")
@@ -51,7 +51,7 @@ def get_refill_record(index):
 def get_dispense_record(index):
     """ Get dispense record in History """
     try:
-        logger.info("Attempting to connect to Kafka at %s", hostname)
+        logger.debug("Attempting to connect to Kafka at %s", hostname)
         client = KafkaClient(hosts=hostname)
     except Exception as e:
         logger.error(f"{e}")
@@ -77,7 +77,7 @@ def get_dispense_record(index):
 def get_event_stats():
     """ Get stats in History """
     try:
-        logger.info("Attempting to connect to Kafka at %s", hostname)
+        logger.debug("Attempting to connect to Kafka at %s", hostname)
         client = KafkaClient(hosts=hostname)
     except Exception as e:
         logger.error(f"{e}")
@@ -85,7 +85,6 @@ def get_event_stats():
     topic = client.topics[str.encode(app_config["events"]["topic"])]
     consumer = topic.get_simple_consumer(reset_offset_on_start=True,
     consumer_timeout_ms=1000)
-    logger.debug("Connected to Kafka at %s", hostname)
     logger.info("Retrieving stats")
     try:
         stats = {'dispense': 0, 'refill': 0}
