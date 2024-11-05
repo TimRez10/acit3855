@@ -73,7 +73,7 @@ def get_dispense_record(index):
     except:
         logger.error("No more messages found")
         pass
-    logger.error("Could not find BP at index %d" % index)
+    logger.error("Could not find dispense at index %d" % index)
     return { "message": "Not Found"}, 404
 
 def get_event_stats():

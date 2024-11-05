@@ -5,7 +5,6 @@ export default function EndpointAnalyzerStats() {
     const [isLoaded, setIsLoaded] = useState(false);
     const [log, setLog] = useState(null);
     const [error, setError] = useState(null)
-	const rand_val = Math.floor(Math.random() * 10); // Get a random event from the event store
 
     const getAnalyzer = () => {
         fetch(`http://ec2-3-86-233-230.compute-1.amazonaws.com:8110/stats`)
@@ -20,7 +19,7 @@ export default function EndpointAnalyzerStats() {
             })
     }
 	useEffect(() => {
-		const interval = setInterval(() => getAnalyzer(), 4000); // Update every 4 seconds
+		const interval = setInterval(() => getAnalyzer(), 3000); // Update every 3 seconds
 		return() => clearInterval(interval);
     }, [getAnalyzer]);
 
