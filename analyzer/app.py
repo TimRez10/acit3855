@@ -7,6 +7,8 @@ import logging.config
 from dotenv import load_dotenv
 from pykafka import KafkaClient 
 import os
+from connexion.middleware import MiddlewarePosition
+from starlette.middleware.cors import CORSMiddleware
 
 load_dotenv()
 

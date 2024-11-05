@@ -5,7 +5,7 @@ export default function EndpointAnalyzer(props) {
     const [isLoaded, setIsLoaded] = useState(false);
     const [log, setLog] = useState(null);
     const [error, setError] = useState(null)
-	const rand_val = Math.floor(Math.random() * 100); // Get a random event from the event store
+	const rand_val = Math.floor(Math.random() * 10); // Get a random event from the event store
 
     const getAnalyzer = () => {
         fetch(`http://ec2-3-86-233-230.compute-1.amazonaws.com:8110/${props.endpoint}?index=${rand_val}`)
