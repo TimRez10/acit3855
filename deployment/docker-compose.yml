@@ -44,7 +44,7 @@ services:
   receiver:
     build:
       context: ../receiver
-    # image: receiver
+    # image: deployment-receiver
     ports:
       - "8080:8080"
     depends_on:
@@ -55,7 +55,7 @@ services:
   storage:
     build:
       context: ../storage
-    # image: storage
+    # image: deployment-storage
     ports:
       - "8090:8090"
     depends_on:
@@ -67,7 +67,7 @@ services:
   processing:
     build:
       context: ../processing
-    # image: processing
+    # image: deployment-processing
     ports:
       - "8100:8100"
     network_mode: "host"
@@ -79,7 +79,7 @@ services:
   analyzer:
     build:
       context: ../analyzer
-    # image: analyzer
+    # image: deployment-analyzer
     ports:
       - "8110:8110"
     depends_on:

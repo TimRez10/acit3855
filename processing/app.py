@@ -94,7 +94,8 @@ def get_stats():
         'num_dispense_records': data['num_dispense_records'],
         'max_dispense_amount_paid': data['max_dispense_amount_paid'],
         'num_refill_records': data['num_refill_records'],
-        'max_refill_quantity': data['max_refill_quantity']
+        'max_refill_quantity': data['max_refill_quantity'],
+        'last_updated': data['last_updated']
     }
 
     logger.debug(f"Contents: {response}")
