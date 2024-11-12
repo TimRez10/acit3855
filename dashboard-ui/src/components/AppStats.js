@@ -1,5 +1,3 @@
-require('dotenv').config({});
-
 import React, { useEffect, useState } from 'react'
 import '../App.css';
 
@@ -10,7 +8,7 @@ export default function AppStats() {
 
 	const getStats = () => {
 	
-        fetch(`http://${process.env.HOST_NAME}:8100/stats`)
+        fetch(`http://ec2-54-152-229-93.compute-1.amazonaws.com:8100/stats`)
             .then(res => res.json())
             .then((result)=>{
 				console.log("Received Stats")
