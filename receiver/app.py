@@ -34,6 +34,7 @@ while retry_count < retries:
         topic = client.topics[str.encode(app_config["events"]["topic"])]
         producer = topic.get_sync_producer()
         retry_count = retries
+        break
     except Exception as e:
         time.sleep(app_config["events"]["sleep_time"])
         retry_count += 1
