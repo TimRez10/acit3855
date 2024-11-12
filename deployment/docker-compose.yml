@@ -101,6 +101,8 @@ services:
     depends_on:
     - "processing"
     - "analyzer"
+    env_file:
+      - .env
 
 
 
