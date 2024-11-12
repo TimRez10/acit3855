@@ -15,6 +15,7 @@ import logging
 import logging.config
 import yaml
 import os
+import time
 
 load_dotenv()
 
@@ -25,19 +26,38 @@ with open('app_conf.yaml', 'r') as f:
     app_config["datastore"]["user"] = os.getenv("MYSQL_USER")
     app_config["datastore"]["password"] = os.getenv("MYSQL_PASSWORD")
 
-
 with open('log_conf.yaml', 'r') as f:
     log_config = yaml.safe_load(f.read())
     logging.config.dictConfig(log_config)
-
 logger = logging.getLogger('basicLogger')
-hostname = "%s:%d" % (app_config["events"]["hostname"], app_config["events"]["port"])
 
+### DB CONNECTION ###
 DB_ENGINE = create_engine(f'mysql+pymysql://{app_config["datastore"]["user"]}:{app_config["datastore"]["password"]}@{app_config["datastore"]["hostname"]}:{app_config["datastore"]["port"]}/{app_config["datastore"]["db"]}')
 Base.metadata.bind = DB_ENGINE
 DB_SESSION = sessionmaker(bind=DB_ENGINE)
-
 logger.info(f'Connecting to DB {app_config["datastore"]["hostname"]}. Port: {app_config["datastore"]["port"]}')
+
+### KAFKA CONNECTION ###
+hostname = "%s:%d" % (app_config["events"]["hostname"], app_config["events"]["port"])
+retries = app_config["events"]["retries"]
+retry_count = 0
+while retry_count < retries:
+    try:
+        logger.debug("Attempting to connect to Kafka at %s", hostname)
+        client = KafkaClient(hosts=hostname)
+        logger.debug("Connected to Kafka at %s", hostname)
+        topic = client.topics[str.encode(app_config["events"]["topic"])]
+        consumer = topic.get_simple_consumer(
+            consumer_group=b'event_group',
+            reset_offset_on_start=False,
+            auto_offset_reset=OffsetType.LATEST
+        )
+        retry_count = retries
+    except Exception as e:
+        logger.error(f"{e}. {retry_count} out of {retries} retries remaining.")
+        time.sleep(app_config["events"]["sleep_time"])
+        retry_count += 1
+
 
 def add_dispense_record(body): 
     """ Receives a dispense record """
@@ -126,18 +146,6 @@ def get_dispense_record(start_timestamp, end_timestamp):
 
 def process_messages():
     """ Process event messages """
-    try:
-        logger.debug("Attempting to connect to Kafka at %s", hostname)
-        client = KafkaClient(hosts=hostname)
-    except Exception as e:
-        logger.error(f"{e}")
-    logger.debug("Connected to Kafka at %s", hostname)
-    topic = client.topics[str.encode(app_config["events"]["topic"])]
-    consumer = topic.get_simple_consumer(
-        consumer_group=b'event_group',
-        reset_offset_on_start=False,
-        auto_offset_reset=OffsetType.LATEST
-    )
     for msg in consumer:
         msg_str = msg.value.decode('utf-8')
         msg = json.loads(msg_str)

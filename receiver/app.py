@@ -8,6 +8,7 @@ import logging.config
 import uuid
 import datetime
 import os
+import time
 from pykafka import KafkaClient 
 
 load_dotenv()
@@ -19,25 +20,32 @@ with open('app_conf.yaml', 'r') as f:
 with open('log_conf.yaml', 'r') as f:
     log_config = yaml.safe_load(f.read())
     logging.config.dictConfig(log_config)
-
 logger = logging.getLogger('basicLogger')
+
+### KAFKA CONNECTION ###
 hostname = "%s:%d" % (app_config["events"]["hostname"], app_config["events"]["port"])
+retries = app_config["events"]["retries"]
+retry_count = 0
+while retry_count < retries:
+    try:
+        logger.debug("Attempting to connect to Kafka at %s", hostname)
+        client = KafkaClient(hosts=hostname)
+        logger.debug("Connected to Kafka at %s", hostname)
+        topic = client.topics[str.encode(app_config["events"]["topic"])]
+        producer = topic.get_sync_producer()
+        retry_count = retries
+    except Exception as e:
+        logger.error(f"{e}. {retry_count} out of {retries} retries remaining.")
+        time.sleep(app_config["events"]["sleep_time"])
+        retry_count += 1
+
 
 def add_dispense_record(body):
     trace_id = str(uuid.uuid4())
     logger.info(f"Received event add_dispense_record request with a trace id of {trace_id}")
     body["trace_id"] = trace_id
 
-    try:
-        logger.debug("Attempting to connect to Kafka at %s", hostname)
-        client = KafkaClient(hosts=hostname)
-    except Exception as e:
-        logger.error(f"{e}")
-        return e, 400
-    logger.debug(f'Connected to Kafka client on {hostname}')
 
-    topic = client.topics[str.encode(app_config["events"]["topic"])]
-    producer = topic.get_sync_producer()
     msg = { 
         "type": "dispense",
         "datetime" : datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
@@ -51,22 +59,11 @@ def add_dispense_record(body):
     return NoContent, 201
 
 
-
 def add_refill_record(body):
     trace_id=str(uuid.uuid4())
     logger.info(f"Received event add_refill_record request with a trace id of {trace_id}")
     body["trace_id"] = trace_id
     
-    try:
-        logger.debug("Attempting to connect to Kafka at %s", hostname)
-        client = KafkaClient(hosts=hostname)
-    except Exception as e:
-        logger.error(f"{e}")
-        return e, 400
-    logger.debug(f'Connected to Kafka client on {hostname}')
-    
-    topic = client.topics[str.encode(app_config["events"]["topic"])]
-    producer = topic.get_sync_producer()
     msg = { 
         "type": "refill",
         "datetime" : datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
