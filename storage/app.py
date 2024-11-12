@@ -57,12 +57,14 @@ while retry_count < retries:
             reset_offset_on_start=False,
             auto_offset_reset=OffsetType.LATEST
         )
-        retry_count = retries
+        break
     except Exception as e:
-        logger.error(f"{e}. {retry_count} out of {retries} retries remaining.")
         time.sleep(app_config["events"]["sleep_time"])
         retry_count += 1
-
+        logger.error(f"{e}. {retries-retry_count} out of {retries} retries remaining.")
+    if retry_count == retries:
+        logger.info(f"Quitting...")
+        quit
 
 def add_dispense_record(body): 
     """ Receives a dispense record """

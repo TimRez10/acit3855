@@ -35,9 +35,12 @@ while retry_count < retries:
         producer = topic.get_sync_producer()
         retry_count = retries
     except Exception as e:
-        logger.error(f"{e}. {retry_count} out of {retries} retries remaining.")
         time.sleep(app_config["events"]["sleep_time"])
         retry_count += 1
+        logger.error(f"{e}. {retries-retry_count} out of {retries} retries remaining.")
+    if retry_count == retries:
+        logger.info(f"Quitting...")
+        quit
 
 
 def add_dispense_record(body):
