@@ -9,7 +9,7 @@ export default function EndpointAnalyzer(props) {
 	const rand_val = Math.floor(Math.random() * 100); // Get a random event from the event store
 
     const getAnalyzer = () => {
-        fetch(`http://ec2-54-152-229-93.compute-1.amazonaws.com:8110/${props.endpoint}?index=${rand_val}`)
+        fetch(`http://ec2-44-211-141-88.compute-1.amazonaws.com:8110/${props.endpoint}?index=${rand_val}`)
             .then(res => res.json())
             .then((result)=>{
                 setIndex(rand_val);
@@ -31,7 +31,7 @@ export default function EndpointAnalyzer(props) {
     } else if (isLoaded === false){
         return(<div>Loading...</div>)
     } else if (isLoaded === true){
-        
+
         return (
             <div>
                 <h3>{props.endpoint}-{index}</h3>

@@ -4,7 +4,7 @@ refillstore:
 dispensestore:
   url: http://localhost:8090/dispenses
 events:
-  hostname: 
+  hostname: ec2-44-211-141-88.compute-1.amazonaws.com
   port: 9092
   topic: events
   retries: 5

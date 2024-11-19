@@ -1,6 +1,5 @@
 import connexion
 from connexion import NoContent
-from dotenv import load_dotenv
 import json
 import yaml
 import logging
@@ -9,13 +8,11 @@ import uuid
 import datetime
 import os
 import time
-from pykafka import KafkaClient 
-
-load_dotenv()
+import sys
+from pykafka import KafkaClient
 
 with open('app_conf.yaml', 'r') as f:
     app_config = yaml.safe_load(f.read())
-    app_config["events"]["hostname"] = os.getenv("HOST_NAME")
 
 with open('log_conf.yaml', 'r') as f:
     log_config = yaml.safe_load(f.read())
@@ -40,8 +37,8 @@ while retry_count < retries:
         retry_count += 1
         logger.error(f"{e}. {retries-retry_count} out of {retries} retries remaining.")
     if retry_count == retries:
-        logger.info(f"Quitting...")
-        quit
+        logger.info(f"Can't connect to Kafka. Exiting...")
+        sys.exit()
 
 
 def add_dispense_record(body):
@@ -50,7 +47,7 @@ def add_dispense_record(body):
     body["trace_id"] = trace_id
 
 
-    msg = { 
+    msg = {
         "type": "dispense",
         "datetime" : datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
         "payload": body
@@ -67,8 +64,8 @@ def add_refill_record(body):
     trace_id=str(uuid.uuid4())
     logger.info(f"Received event add_refill_record request with a trace id of {trace_id}")
     body["trace_id"] = trace_id
-    
-    msg = { 
+
+    msg = {
         "type": "refill",
         "datetime" : datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
         "payload": body

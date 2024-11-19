@@ -16,6 +16,7 @@ import logging.config
 import yaml
 import os
 import time
+import sys
 
 load_dotenv()
 
@@ -63,8 +64,8 @@ while retry_count < retries:
         retry_count += 1
         logger.error(f"{e}. {retries-retry_count} out of {retries} retries remaining.")
     if retry_count == retries:
-        logger.info(f"Quitting...")
-        quit
+        logger.info(f"Can't connect to Kafka. Exiting...")
+        sys.exit()
 
 def add_dispense_record(body): 
     """ Receives a dispense record """

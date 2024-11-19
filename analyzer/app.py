@@ -4,17 +4,13 @@ import json
 import yaml
 import logging
 import logging.config
-from dotenv import load_dotenv
-from pykafka import KafkaClient 
+from pykafka import KafkaClient
 import os
 from connexion.middleware import MiddlewarePosition
 from starlette.middleware.cors import CORSMiddleware
 
-load_dotenv()
-
 with open('app_conf.yaml', 'r') as f:
     app_config = yaml.safe_load(f.read())
-    app_config["events"]["hostname"] = os.getenv("HOST_NAME")
 
 with open('log_conf.yaml', 'r') as f:
     log_config = yaml.safe_load(f.read())
