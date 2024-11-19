@@ -12,12 +12,12 @@ from starlette.middleware.cors import CORSMiddleware
 
 if "TARGET_ENV" in os.environ and os.environ["TARGET_ENV"] == "test":
     print("In Test Environment")
-    app_conf_file = "/config/app_conf.yml"
-    log_conf_file = "/config/log_conf.yml"
+    app_conf_file = "/config/app_conf.yaml"
+    log_conf_file = "/config/log_conf.yaml"
 else:
     print("In Dev Environment")
-    app_conf_file = "app_conf.yml"
-    log_conf_file = "log_conf.yml"
+    app_conf_file = "app_conf.yaml"
+    log_conf_file = "log_conf.yaml"
 
 with open(app_conf_file, 'r') as f:
     app_config = yaml.safe_load(f.read())
