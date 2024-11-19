@@ -6,7 +6,7 @@ datastore:
   port: 3306
   db: events
 events:
-  hostname:
+  hostname: ec2-44-211-141-88.compute-1.amazonaws.com
   port: 9092
   topic: events
   retries: 5
