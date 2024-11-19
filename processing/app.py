@@ -10,14 +10,27 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from connexion.middleware import MiddlewarePosition
 from starlette.middleware.cors import CORSMiddleware
 
-with open('app_conf.yaml', 'r') as f:
+if "TARGET_ENV" in os.environ and os.environ["TARGET_ENV"] == "test":
+    print("In Test Environment")
+    app_conf_file = "/config/app_conf.yml"
+    log_conf_file = "/config/log_conf.yml"
+else:
+    print("In Dev Environment")
+    app_conf_file = "app_conf.yml"
+    log_conf_file = "log_conf.yml"
+
+with open(app_conf_file, 'r') as f:
     app_config = yaml.safe_load(f.read())
 
-with open('log_conf.yaml', 'r') as f:
+# External Logging Configuration
+with open(log_conf_file, 'r') as f:
     log_config = yaml.safe_load(f.read())
     logging.config.dictConfig(log_config)
 
 logger = logging.getLogger('basicLogger')
+
+logger.info("App Conf File: %s" % app_conf_file)
+logger.info("Log Conf File: %s" % log_conf_file)
 
 def populate_stats():
     logger.info("Start Periodic Processing")
@@ -41,12 +54,12 @@ def populate_stats():
         dispense_event = requests.get(dispense_url)
     except Exception as e:
         logger.error(f"{e}")
-    
+
     if dispense_event.status_code == 200:
         logger.info(f"dispenses: Received {len(dispense_event.json())} events.")
     else:
         logger.error(f"dispenses: Response code is not 200. Response code is {dispense_event.status_code}.")
-    
+
     refill_url = f"{app_config['eventstore']['url']}/refills?end_timestamp={current_time}&start_timestamp={data['last_updated']}"
 
     try:
@@ -78,13 +91,13 @@ def populate_stats():
 
     with open(app_config['datastore']['filename'], "w") as events:
         json.dump(data, events)
-    
+
     logger.info("Ended Periodic Processing")
-        
+
 
 def get_stats():
     logger.info("get_stats request started")
-   
+
     if not os.path.isfile(app_config['datastore']['filename']):
         logger.error(f"Statistics do not exist.")
         return "Statistics do not exist.", 404

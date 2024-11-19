@@ -1,12 +1,12 @@
 version: 1
 datastore:
-  user: 
-  password: 
-  hostname: 
+  user: user
+  password: c*****y
+  hostname: ec2-44-211-141-88.compute-1.amazonaws.com
   port: 3306
   db: events
 events:
-  hostname: 
+  hostname:
   port: 9092
   topic: events
   retries: 5

@@ -1,14 +1,13 @@
 import connexion
 from connexion import NoContent
-from dotenv import load_dotenv
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.orm import sessionmaker
 from base import Base
 from dispenses import DispenseItem
 from refills import RefillItem
-from threading import Thread 
-from pykafka import KafkaClient 
-from pykafka.common import OffsetType 
+from threading import Thread
+from pykafka import KafkaClient
+from pykafka.common import OffsetType
 import json
 import datetime
 import logging
@@ -18,19 +17,27 @@ import os
 import time
 import sys
 
-load_dotenv()
+if "TARGET_ENV" in os.environ and os.environ["TARGET_ENV"] == "test":
+    print("In Test Environment")
+    app_conf_file = "/config/app_conf.yml"
+    log_conf_file = "/config/log_conf.yml"
+else:
+    print("In Dev Environment")
+    app_conf_file = "app_conf.yml"
+    log_conf_file = "log_conf.yml"
 
-with open('app_conf.yaml', 'r') as f:
+with open(app_conf_file, 'r') as f:
     app_config = yaml.safe_load(f.read())
-    app_config["events"]["hostname"] = os.getenv("HOST_NAME")
-    app_config["datastore"]["hostname"] = os.getenv("HOST_NAME")
-    app_config["datastore"]["user"] = os.getenv("MYSQL_USER")
-    app_config["datastore"]["password"] = os.getenv("MYSQL_PASSWORD")
 
-with open('log_conf.yaml', 'r') as f:
+# External Logging Configuration
+with open(log_conf_file, 'r') as f:
     log_config = yaml.safe_load(f.read())
     logging.config.dictConfig(log_config)
+
 logger = logging.getLogger('basicLogger')
+
+logger.info("App Conf File: %s" % app_conf_file)
+logger.info("Log Conf File: %s" % log_conf_file)
 
 ### DB CONNECTION ###
 DB_ENGINE = create_engine(
@@ -67,7 +74,7 @@ while retry_count < retries:
         logger.info(f"Can't connect to Kafka. Exiting...")
         sys.exit()
 
-def add_dispense_record(body): 
+def add_dispense_record(body):
     """ Receives a dispense record """
     data=body
     session = DB_SESSION()
@@ -82,7 +89,7 @@ def add_dispense_record(body):
     session.close()
     logger.debug(f"Stored event add_dispense_record request with a trace id of {data['trace_id']}")
 
-    return NoContent, 201 
+    return NoContent, 201
 
 
 
@@ -101,7 +108,7 @@ def add_refill_record(body):
     session.close()
     logger.debug(f"Stored event add_refill_record request with a trace id of {data['trace_id']}")
 
-    return NoContent, 201 
+    return NoContent, 201
 
 
 
