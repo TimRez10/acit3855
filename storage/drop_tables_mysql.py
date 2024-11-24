@@ -1,17 +1,21 @@
 import mysql.connector
 import yaml
-from dotenv import load_dotenv
 import os
 
-load_dotenv()
+# Environment-based configuration file paths
+if "TARGET_ENV" in os.environ and os.environ["TARGET_ENV"] == "test":
+    print("In Test Environment")
+    APP_CONF_FILE = "/config/app_conf.yaml"
+else:
+    print("In Dev Environment")
+    APP_CONF_FILE = "app_conf.yaml"
 
-with open('app_conf.yaml', 'r') as f:
-    app_config = yaml.safe_load(f.read())
-    app_config["datastore"]["hostname"] = os.getenv("KAFKA_HOST_NAME")
-    app_config["datastore"]["user"] = os.getenv("MYSQL_USER")
-    app_config["datastore"]["password"] = os.getenv("MYSQL_PASSWORD")
+# Load application configuration
+with open(APP_CONF_FILE, 'r', encoding="utf-8") as app_file:
+    APP_CONFIG = yaml.safe_load(app_file.read())
 
-db_conn = mysql.connector.connect(host=app_config["datastore"]["hostname"], user=app_config["datastore"]["user"], password=app_config["datastore"]["password"], database=app_config["datastore"]["db"])
+
+db_conn = mysql.connector.connect(host=APP_CONFIG["datastore"]["hostname"], user=APP_CONFIG["datastore"]["user"], password=APP_CONFIG["datastore"]["password"], database=APP_CONFIG["datastore"]["db"])
 
 db_cursor = db_conn.cursor()
 

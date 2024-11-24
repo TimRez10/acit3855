@@ -1,0 +1,10 @@
+version: 1
+events:
+  hostname: ec2-44-211-141-88.compute-1.amazonaws.com
+  port: 9092
+  topic: events
+anomalies:
+  item_quantity_threshold: 50000
+  amount_paid_threshold: 50000
+datastore:
+  filename: /data/anomalies.json
