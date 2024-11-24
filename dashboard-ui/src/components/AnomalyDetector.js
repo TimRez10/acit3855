@@ -56,14 +56,14 @@ export default function AnomalyDetector() {
         return (
             <div>
                 <h3>Dispense Latest Anomaly UUID:</h3>
-                <p>{tooHighLatest['event_id']}</p>
-                <p>{tooHighLatest['description']}</p>
-                <p>Detected on {tooHighLatest['timestamp']}</p>
+                <p>{tooHighLatest.event_id}</p>
+                <p>{tooHighLatest.description}</p>
+                <p>Detected on {tooHighLatest.timestamp}</p>
 
                 <h3>Refill Latest Anomaly UUID:</h3>
-                <p>{tooLowLatest['event_id']}</p>
-                <p>{tooLowLatest['description']}</p>
-                <p>Detected on {tooLowLatest['timestamp']}</p>
+                <p>{tooLowLatest.event_id}</p>
+                <p>{tooLowLatest.description}</p>
+                <p>Detected on {tooLowLatest.timestamp}</p>
             </div>
         )
     }

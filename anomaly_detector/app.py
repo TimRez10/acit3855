@@ -36,12 +36,12 @@ logger.info("Log Conf File: %s" % log_conf_file)
 hostname = "%s:%d" % (app_config["events"]["hostname"], app_config["events"]["port"])
 
 def check_dispense_anomaly(event):
-    if app_config["anomalies"]["amount_paid_threshold"] > event['amount_paid']:
+    if app_config["anomalies"]["amount_paid_threshold"] < event['amount_paid']: # Too High
         return True
     return False
 
 def check_refill_anomaly(event):
-    if app_config["anomalies"]["item_quantity_threshold"] < event['item_quantity']:
+    if app_config["anomalies"]["item_quantity_threshold"] > event['item_quantity']: # Too Low
         return True
     return False
 
@@ -65,7 +65,7 @@ def get_anomalies(anomaly_type):
         for anomaly in data:
             if anomaly['anomaly_type'] == anomaly_type:
                 relevant_anomalies.append(anomaly)
-        # Sort the list by timestamp in descending order
+        # Sort the list by newest to oldest
         relevant_anomalies.sort(key=lambda x: datetime.strptime(x['timestamp'], "%Y-%m-%d %H:%M:%S"), reverse=True)
     except Exception as e:
         logger.error(f"{e}")
@@ -114,11 +114,18 @@ def find_anomalies():
 
 
 def populate_anomalies(anomaly_list):
-    data = []
+    if not os.path.isfile(app_config['datastore']['filename']):
+        data = []
+    else:
+        with open(app_config['datastore']['filename'], "r") as events:
+            data = json.load(events)
 
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+    existing_event_ids = {item['event_id'] for item in data}
+
     for event in anomaly_list:
+        anomaly_item = None
         if event['type'] == 'dispense':
             anomaly_item = {
                 "event_id": str(uuid.uuid4()),
@@ -138,9 +145,16 @@ def populate_anomalies(anomaly_list):
                 "timestamp": current_time
             }
         else:
-            logger.error(f"Unknown event type", event['type'])
-        data.append(anomaly_item)
-        logger.info(f"Anomaly with trace ID {event['payload']['trace_id']} added to list")
+            logger.error(f"Unknown event type: {event['type']}")
+            continue
+
+        # Check if the event_id already exists
+        if anomaly_item and anomaly_item['event_id'] not in existing_event_ids:
+            data.append(anomaly_item)
+            existing_event_ids.add(anomaly_item['event_id'])
+            logger.info(f"Anomaly with trace ID {event['payload']['trace_id']} added to list")
+        else:
+            logger.info(f"Anomaly with trace ID {event['payload']['trace_id']} already exists in the data")
 
     with open(app_config['datastore']['filename'], "w") as events:
         logger.debug(f"Dumping anomalies to {app_config['datastore']['filename']}")
