@@ -12,7 +12,7 @@ export default function AnomalyDetector() {
             .then(res => res.json())
             .then((result)=>{
                 console.log("Received Anomalies")
-                setTooHighStats(result);
+                setTooHighStats(result[0]);
                 setIsLoaded(true);
             },(error) =>{
                 setError(error)
@@ -29,7 +29,7 @@ export default function AnomalyDetector() {
             .then(res => res.json())
             .then((result)=>{
                 console.log("Received Anomalies")
-                setTooLowStats(result);
+                setTooLowStats(result[0]);
                 setIsLoaded(true);
             },(error) =>{
                 setError(error)
@@ -50,12 +50,12 @@ export default function AnomalyDetector() {
 
         return (
             <div>
-                <h2>Dispense Latest Anomaly UUID:</h2>
+                <h3>Dispense Latest Anomaly UUID:</h3>
                 <p>{tooHighStats['event_id']}</p>
                 <p>{tooHighStats['description']}</p>
                 <p>Detected on {tooHighStats['timestamp']}</p>
 
-                <h2>Refill Latest Anomaly UUID:</h2>
+                <h3>Refill Latest Anomaly UUID:</h3>
                 <p>{tooLowStats['event_id']}</p>
                 <p>{tooLowStats['description']}</p>
                 <p>Detected on {tooLowStats['timestamp']}</p>

@@ -60,13 +60,16 @@ def get_anomalies(anomaly_type):
     with open(app_config['datastore']['filename'], "r") as anomalies:
         data = json.load(anomalies)
 
-    relevant_anomalies = []
-    for anomaly in data:
-        if anomaly['anomaly_type'] == anomaly_type:
-            relevant_anomalies.append(anomaly)
-
-    # Sort the list by timestamp in descending order
-    relevant_anomalies.sort(key=lambda x: datetime.strptime(x['timestamp'], "%Y-%m-%d %H:%M:%S"), reverse=True)
+    try:
+        relevant_anomalies = []
+        for anomaly in data:
+            if anomaly['anomaly_type'] == anomaly_type:
+                relevant_anomalies.append(anomaly)
+        # Sort the list by timestamp in descending order
+        relevant_anomalies.sort(key=lambda x: datetime.strptime(x['timestamp'], "%Y-%m-%d %H:%M:%S"), reverse=True)
+    except Exception as e:
+        logger.error(f"{e}")
+        return e, 400
 
     logger.info(f"GET /anomalies request has been responded to for type {anomaly_type}")
 
@@ -111,12 +114,7 @@ def find_anomalies():
 
 
 def populate_anomalies(anomaly_list):
-    if not os.path.isfile(app_config['datastore']['filename']):
-        data = []
-    else:
-        logger.debug(f"Loading {app_config['datastore']['filename']}")
-        with open(app_config['datastore']['filename'], "r") as events:
-            data = json.load(events)
+    data = []
 
     current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 

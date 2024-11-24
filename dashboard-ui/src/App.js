@@ -23,7 +23,7 @@ function App() {
                 {rendered_endpoints}
                 <h3>Analyzer Stats</h3>
                 <EndpointAnalyzerStats/>
-                <h1>Anomalies</h1>
+                <h2>Anomalies</h2>
                 <AnomalyDetector/>
             </div>
         </div>
