@@ -7,6 +7,7 @@ import logging.config
 from pykafka import KafkaClient
 import os
 import datetime
+import uuid
 from connexion.middleware import MiddlewarePosition
 from starlette.middleware.cors import CORSMiddleware
 
@@ -122,7 +123,7 @@ def populate_anomalies(anomaly_list):
     for event in anomaly_list:
         if event['type'] == 'dispense':
             anomaly_item = {
-                "event_id": event['payload']['id'],
+                "event_id": str(uuid.uuid4()),
                 "trace_id": event['payload']['trace_id'],
                 "event_type": "Dispense",
                 "anomaly_type": "TooHigh",
@@ -131,7 +132,7 @@ def populate_anomalies(anomaly_list):
             }
         elif event['type'] == 'refill':
             anomaly_item = {
-                "event_id": event['payload']['id'],
+                "event_id": str(uuid.uuid4()),
                 "trace_id": event['payload']['trace_id'],
                 "event_type": "Refill",
                 "anomaly_type": "TooLow",
