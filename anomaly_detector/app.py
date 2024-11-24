@@ -35,93 +35,41 @@ logger.info("Log Conf File: %s" % log_conf_file)
 
 hostname = "%s:%d" % (app_config["events"]["hostname"], app_config["events"]["port"])
 
+# Anomaly Detection Functions
 def check_dispense_anomaly(event):
-    if app_config["anomalies"]["amount_paid_threshold"] < event['amount_paid']: # Too High
-        return True
-    return False
+    """
+    Check if a dispense event contains an anomaly based on amount paid.
+    """
+    return app_config["anomalies"]["amount_paid_threshold"] < event['amount_paid']
+
 
 def check_refill_anomaly(event):
-    if app_config["anomalies"]["item_quantity_threshold"] > event['item_quantity']: # Too Low
-        return True
-    return False
+    """
+    Check if a refill event contains an anomaly based on item quantity.
+    """
+    return app_config["anomalies"]["item_quantity_threshold"] > event['item_quantity']
 
-anomaly_checks = {'dispense': check_dispense_anomaly, 'refill': check_refill_anomaly}
-
-logger.info("Dispense amount_paid anomaly threshold: %s" % app_config["anomalies"]["amount_paid_threshold"])
-logger.info("Refill item_quantity anomaly threshold: %s" % app_config["anomalies"]["item_quantity_threshold"])
-
-
-
-def get_anomalies(anomaly_type):
-    logger.info(f"GET /anomalies request is received for type {anomaly_type}")
-
-    find_anomalies()
-
-    with open(app_config['datastore']['filename'], "r") as anomalies:
-        data = json.load(anomalies)
-
-    try:
-        relevant_anomalies = []
-        for anomaly in data:
-            if anomaly['anomaly_type'] == anomaly_type:
-                relevant_anomalies.append(anomaly)
-        # Sort the list by newest to oldest
-        relevant_anomalies.sort(key=lambda x: datetime.strptime(x['timestamp'], "%Y-%m-%d %H:%M:%S"), reverse=True)
-    except Exception as e:
-        logger.error(f"{e}")
-        return e, 400
-
-    logger.info(f"GET /anomalies request has been responded to for type {anomaly_type}")
-
-    return relevant_anomalies, 200
-
-def find_anomalies():
-    """ Get anomalies """
-    try:
-        logger.debug("Attempting to connect to Kafka at %s", hostname)
-        client = KafkaClient(hosts=hostname)
-    except Exception as e:
-        logger.error(f"{e}")
-        return e, 400
-    topic = client.topics[str.encode(app_config["events"]["topic"])]
-    consumer = topic.get_simple_consumer(reset_offset_on_start=True,consumer_timeout_ms=1000)
-    logger.info("Retrieving anomalies")
-    anomaly_list = []
-
-    try:
-        for msg in consumer:
-            msg_str = msg.value.decode('utf-8')
-            msg = json.loads(msg_str)
-            logger.debug(msg)
-            has_anomaly = anomaly_checks[msg['type']](msg['payload'])
-            if not has_anomaly:
-                continue
-            anomaly_list.append(msg)
-    except:
-        logger.error("No stats found")
-        return NoContent, 404
-
-    logger.info(f"Found {len(anomaly_list)} anomalies")
-
-    try:
-        logger.info("Populating anomalies datastore...")
-        populate_anomalies(anomaly_list)
-    except Exception as e:
-        logger.error(f"{e}")
-        return e, 400
-
-    logger.info("Populated anomalies datastore!")
+anomaly_checks = {
+    'dispense': check_dispense_anomaly,
+    'refill': check_refill_anomaly
+}
 
 
+# Data Processing Functions
 def populate_anomalies(anomaly_list):
-    if not os.path.isfile(app_config['datastore']['filename']):
+    """
+    Store detected anomalies in the JSON datastore.
+    """
+    filename = app_config['datastore']['filename']
+
+    # Read existing data
+    if not os.path.isfile(filename):
         data = []
     else:
-        with open(app_config['datastore']['filename'], "r") as events:
+        with open(filename, "r") as events:
             data = json.load(events)
 
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
     existing_trace_ids = {item['trace_id'] for item in data}
 
     for event in anomaly_list:
@@ -148,19 +96,100 @@ def populate_anomalies(anomaly_list):
             logger.error(f"Unknown event type: {event['type']}")
             continue
 
-        # Check if the trace_id already exists
         if anomaly_item and anomaly_item['trace_id'] not in existing_trace_ids:
             data.append(anomaly_item)
             existing_trace_ids.add(anomaly_item['trace_id'])
-            logger.info(f"Anomaly with trace ID {event['payload']['trace_id']} added to list")
+            logger.info(f"Added new anomaly with trace ID {event['payload']['trace_id']}")
         else:
-            logger.info(f"Anomaly with trace ID {event['payload']['trace_id']} already exists in the data")
+            logger.info(f"Skipped duplicate anomaly with trace ID {event['payload']['trace_id']}")
 
-    with open(app_config['datastore']['filename'], "w") as events:
-        logger.debug(f"Dumping anomalies to {app_config['datastore']['filename']}")
+    # Write updated data
+    with open(filename, "w") as events:
+        logger.debug(f"Writing {len(data)} anomalies to {filename}")
         json.dump(data, events)
 
 
+def find_anomalies():
+    """
+    Consume events from Kafka and detect anomalies.
+    """
+    hostname = "%s:%d" % (app_config["events"]["hostname"], app_config["events"]["port"])
+
+    try:
+        logger.debug(f"Connecting to Kafka at {hostname}")
+        client = KafkaClient(hosts=hostname)
+    except Exception as e:
+        logger.error(f"Failed to connect to Kafka: {e}")
+        return e, 400
+
+    topic = client.topics[str.encode(app_config["events"]["topic"])]
+    consumer = topic.get_simple_consumer(reset_offset_on_start=True, consumer_timeout_ms=1000)
+
+    logger.info("Starting anomaly detection process")
+    anomaly_list = []
+
+    try:
+        for msg in consumer:
+            msg_str = msg.value.decode('utf-8')
+            msg = json.loads(msg_str)
+            logger.debug(f"Processing event: {msg}")
+
+            has_anomaly = anomaly_checks[msg['type']](msg['payload'])
+            if has_anomaly:
+                anomaly_list.append(msg)
+                logger.info(f"Detected anomaly in {msg['type']} event")
+    except Exception as e:
+        logger.error(f"Error processing Kafka messages: {e}")
+        return NoContent, 404
+
+    logger.info(f"Detected {len(anomaly_list)} anomalies in total")
+
+    try:
+        logger.info("Storing detected anomalies...")
+        populate_anomalies(anomaly_list)
+    except Exception as e:
+        logger.error(f"Failed to store anomalies: {e}")
+        return e, 400
+
+    logger.info("Successfully completed anomaly detection process")
+
+
+# Endpoint Function
+def get_anomalies(anomaly_type):
+    """
+    Retrieve anomalies of a specific type from the datastore.
+    """
+    logger.info(f"Processing GET /anomalies request for type: {anomaly_type}")
+
+    find_anomalies()
+
+    try:
+        with open(app_config['datastore']['filename'], "r") as anomalies:
+            data = json.load(anomalies)
+
+        relevant_anomalies = [
+            anomaly for anomaly in data if anomaly['anomaly_type'] == anomaly_type
+        ]
+
+        # Sort by newest to oldest
+        relevant_anomalies.sort(
+            key=lambda x: datetime.strptime(x['timestamp'], "%Y-%m-%d %H:%M:%S"),
+            reverse=True
+        )
+
+        logger.info(f"Found {len(relevant_anomalies)} matching anomalies")
+        return relevant_anomalies, 200
+
+    except Exception as e:
+        logger.error(f"Error retrieving anomalies: {e}")
+        return e, 400
+
+
+logger.info(f"Dispense amount_paid anomaly threshold: {app_config['anomalies']['amount_paid_threshold']}")
+logger.info(f"Refill item_quantity anomaly threshold: {app_config['anomalies']['item_quantity_threshold']}")
+
+
+# Application Setup
 app = connexion.FlaskApp(__name__, specification_dir='')
 app.add_middleware(
     CORSMiddleware,
@@ -171,5 +200,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.add_api("openapi.yaml", strict_validation=True, validate_responses=True)
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8120)
