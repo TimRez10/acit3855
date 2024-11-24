@@ -69,7 +69,7 @@ def get_anomalies(event_type):
 
     logger.info(f"GET /anomalies request has been responded to for type {event_type}")
 
-    return data, 200
+    return relevant_anomalies, 200
 
 def find_anomalies():
     """ Get anomalies """
@@ -106,6 +106,7 @@ def populate_anomalies(anomaly_list):
     if not os.path.isfile(app_config['datastore']['filename']):
         data = []
     else:
+        logger.debug(f"Loading {app_config['datastore']['filename']}")
         with open(app_config['datastore']['filename'], "r") as events:
             data = json.load(events)
 
@@ -133,9 +134,10 @@ def populate_anomalies(anomaly_list):
         else:
             logger.error(f"Unknown event type", event['type'])
         data.append(anomaly_item)
-        logger.info(f"Anomaly with trace ID {event['payload']['trace_id']} added to database!")
+        logger.info(f"Anomaly with trace ID {event['payload']['trace_id']} added to list")
 
     with open(app_config['datastore']['filename'], "w") as events:
+        logger.debug(f"Dumping anomalies to {app_config['datastore']['filename']}")
         json.dump(data, events)
 
 
