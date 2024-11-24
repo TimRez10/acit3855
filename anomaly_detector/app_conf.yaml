@@ -1,6 +1,6 @@
 version: 1
 events:
-  hostname: ec2-44-211-141-88.compute-1.amazonaws.com
+  hostname: ec2-3-93-190-194.compute-1.amazonaws.com
   port: 9092
   topic: events
 anomalies:
