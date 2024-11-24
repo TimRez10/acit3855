@@ -101,7 +101,7 @@ def populate_anomalies(anomaly_list):
                 "trace_id": event['payload']['trace_id'],
                 "event_type": "Dispense",
                 "anomaly_type": "Too High",
-                "description": f"The value is too high (amount paid of {event['payload']['amount_paid']} is greater than threshold of {app_config["anomalies"]['amount_paid_threshold']})",
+                "description": f"The value is too high (amount paid of {event['payload']['amount_paid']} is greater than threshold of {app_config['anomalies']['amount_paid_threshold']})",
                 "timestamp": current_time
             }
         elif event['type'] == 'refill':
@@ -110,7 +110,7 @@ def populate_anomalies(anomaly_list):
                 "trace_id": event['payload']['trace_id'],
                 "event_type": "Refill",
                 "anomaly_type": "Too High",
-                "description": f"The value is too high (item quantity of {event['payload']['item_quantity']} is greater than threshold of {app_config["anomalies"]['item_quantity_threshold']})",
+                "description": f"The value is too high (item quantity of {event['payload']['item_quantity']} is greater than threshold of {app_config['anomalies']['item_quantity_threshold']})",
                 "timestamp": current_time
             }
         else:
