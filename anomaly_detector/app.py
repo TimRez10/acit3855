@@ -97,8 +97,15 @@ def find_anomalies():
         logger.error("No stats found")
         return NoContent, 404
 
-    logger.info("Populating anomalies datastore...")
-    populate_anomalies(anomaly_list)
+    logger.info(f"Found {len(anomaly_list)} anomalies")
+
+    try:
+        logger.info("Populating anomalies datastore...")
+        populate_anomalies(anomaly_list)
+    except Exception as e:
+        logger.error(f"{e}")
+        return e, 400
+
     logger.info("Populated anomalies datastore!")
 
 
@@ -139,8 +146,6 @@ def populate_anomalies(anomaly_list):
     with open(app_config['datastore']['filename'], "w") as events:
         logger.debug(f"Dumping anomalies to {app_config['datastore']['filename']}")
         json.dump(data, events)
-
-
 
 
 app = connexion.FlaskApp(__name__, specification_dir='')
