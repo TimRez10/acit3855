@@ -7,10 +7,10 @@ export default function EndpointAnalyzerStats() {
     const [error, setError] = useState(null)
 
     const getAnalyzer = () => {
-        fetch(`http://ec2-3-93-190-194.compute-1.amazonaws.com:8110/stats`)
+        fetch(`http://ec2-3-93-190-194.compute-1.amazonaws.com:8120/anomalies`)
             .then(res => res.json())
             .then((result)=>{
-				console.log("Received Analyzer Stats")
+				console.log("Received anomalies")
                 setLog(result);
                 setIsLoaded(true);
             },(error) =>{

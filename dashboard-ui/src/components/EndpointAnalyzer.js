@@ -22,7 +22,7 @@ export default function EndpointAnalyzer(props) {
             })
     }
 	useEffect(() => {
-		const interval = setInterval(() => getAnalyzer(), 4000); // Update every 4 seconds
+		const interval = setInterval(() => getAnalyzer(), 5000); // Update every 5 seconds
 		return() => clearInterval(interval);
     }, [getAnalyzer]);
 
