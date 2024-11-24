@@ -6,7 +6,7 @@ import logging
 import logging.config
 from pykafka import KafkaClient
 import os
-import datetime
+from datetime import datetime
 import uuid
 from connexion.middleware import MiddlewarePosition
 from starlette.middleware.cors import CORSMiddleware
@@ -116,7 +116,7 @@ def find_anomalies():
 def populate_anomalies(anomaly_list):
     data = []
 
-    current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     for event in anomaly_list:
         if event['type'] == 'dispense':
