@@ -51,8 +51,8 @@ logger.info("Refill item_quantity anomaly threshold: %s" % app_config["anomalies
 
 
 
-def get_anomalies(event_type):
-    logger.info(f"GET /anomalies request is received for type {event_type}")
+def get_anomalies(anomaly_type):
+    logger.info(f"GET /anomalies request is received for type {anomaly_type}")
 
     find_anomalies()
 
@@ -61,13 +61,13 @@ def get_anomalies(event_type):
 
     relevant_anomalies = []
     for anomaly in data:
-        if anomaly['anomaly_type'] == event_type:
+        if anomaly['anomaly_type'] == anomaly_type:
             relevant_anomalies.append(anomaly)
 
     # Sort the list by timestamp in descending order
     relevant_anomalies.sort(key=lambda x: datetime.strptime(x['timestamp'], "%Y-%m-%d %H:%M:%S"), reverse=True)
 
-    logger.info(f"GET /anomalies request has been responded to for type {event_type}")
+    logger.info(f"GET /anomalies request has been responded to for type {anomaly_type}")
 
     return relevant_anomalies, 200
 
