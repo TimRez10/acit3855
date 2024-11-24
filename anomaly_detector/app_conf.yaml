@@ -4,7 +4,7 @@ events:
   port: 9092
   topic: events
 anomalies:
-  item_quantity_threshold: 50000
   amount_paid_threshold: 50000
+  item_quantity_threshold: 10000
 datastore:
   filename: /data/anomalies.json

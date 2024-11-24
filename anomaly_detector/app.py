@@ -35,12 +35,12 @@ logger.info("Log Conf File: %s" % log_conf_file)
 hostname = "%s:%d" % (app_config["events"]["hostname"], app_config["events"]["port"])
 
 def check_dispense_anomaly(event):
-    if app_config["anomalies"]["amount_paid_threshold"]  > event['amount_paid']:
+    if app_config["anomalies"]["amount_paid_threshold"] > event['amount_paid']:
         return True
     return False
 
 def check_refill_anomaly(event):
-    if app_config["anomalies"]["item_quantity_threshold"] > event['item_quantity']:
+    if app_config["anomalies"]["item_quantity_threshold"] < event['item_quantity']:
         return True
     return False
 
@@ -49,9 +49,30 @@ anomaly_checks = {'dispense': check_dispense_anomaly, 'refill': check_refill_ano
 logger.info("Dispense amount_paid anomaly threshold: %s" % app_config["anomalies"]["amount_paid_threshold"])
 logger.info("Refill item_quantity anomaly threshold: %s" % app_config["anomalies"]["item_quantity_threshold"])
 
-def get_anomalies():
+
+
+def get_anomalies(event_type):
+    logger.info(f"GET /anomalies request is received for type {event_type}")
+
+    find_anomalies()
+
+    with open(app_config['datastore']['filename'], "r") as anomalies:
+        data = json.load(anomalies)
+
+    relevant_anomalies = []
+    for anomaly in data:
+        if anomaly['anomaly_type'] == event_type:
+            relevant_anomalies.append(anomaly)
+
+    # Sort the list by timestamp in descending order
+    relevant_anomalies.sort(key=lambda x: datetime.strptime(x['timestamp'], "%Y-%m-%d %H:%M:%S"), reverse=True)
+
+    logger.info(f"GET /anomalies request has been responded to for type {event_type}")
+
+    return data, 200
+
+def find_anomalies():
     """ Get anomalies """
-    logger.info("GET /anomalies request is received")
     try:
         logger.debug("Attempting to connect to Kafka at %s", hostname)
         client = KafkaClient(hosts=hostname)
@@ -76,14 +97,10 @@ def get_anomalies():
         logger.error("No stats found")
         return NoContent, 404
 
+    logger.info("Populating anomalies datastore...")
     populate_anomalies(anomaly_list)
+    logger.info("Populated anomalies datastore!")
 
-    with open(app_config['datastore']['filename'], "r") as events:
-        data = json.load(events)
-
-    logger.info("GET /anomalies request has been responded to")
-
-    return data, 200
 
 def populate_anomalies(anomaly_list):
     if not os.path.isfile(app_config['datastore']['filename']):
@@ -92,7 +109,7 @@ def populate_anomalies(anomaly_list):
         with open(app_config['datastore']['filename'], "r") as events:
             data = json.load(events)
 
-    current_time = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+    current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     for event in anomaly_list:
         if event['type'] == 'dispense':
@@ -100,7 +117,7 @@ def populate_anomalies(anomaly_list):
                 "event_id": event['payload']['id'],
                 "trace_id": event['payload']['trace_id'],
                 "event_type": "Dispense",
-                "anomaly_type": "Too High",
+                "anomaly_type": "TooHigh",
                 "description": f"The value is too high (amount paid of {event['payload']['amount_paid']} is greater than threshold of {app_config['anomalies']['amount_paid_threshold']})",
                 "timestamp": current_time
             }
@@ -109,8 +126,8 @@ def populate_anomalies(anomaly_list):
                 "event_id": event['payload']['id'],
                 "trace_id": event['payload']['trace_id'],
                 "event_type": "Refill",
-                "anomaly_type": "Too High",
-                "description": f"The value is too high (item quantity of {event['payload']['item_quantity']} is greater than threshold of {app_config['anomalies']['item_quantity_threshold']})",
+                "anomaly_type": "TooLow",
+                "description": f"The value is too low (item quantity of {event['payload']['item_quantity']} is lower than threshold of {app_config['anomalies']['item_quantity_threshold']})",
                 "timestamp": current_time
             }
         else:
@@ -121,7 +138,7 @@ def populate_anomalies(anomaly_list):
     with open(app_config['datastore']['filename'], "w") as events:
         json.dump(data, events)
 
-    logger.info("Populated anomalies datastore")
+
 
 
 app = connexion.FlaskApp(__name__, specification_dir='')
