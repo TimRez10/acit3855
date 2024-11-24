@@ -41,30 +41,42 @@ export default function AnomalyDetector() {
         return() => clearInterval(interval);
     }, [getTooLowStats]);
 
+    if (error) {
+        return (<div className={"error"}>Error found when fetching from API</div>);
+    } else if (!isLoaded) {
+        return (<div>Loading...</div>);
+    } else {
+        const tooHighLatest = Array.isArray(tooHighStats) && tooHighStats.length > 0 ? tooHighStats[0] : null;
+        const tooLowLatest = Array.isArray(tooLowStats) && tooLowStats.length > 0 ? tooLowStats[0] : null;
 
-    if (error){
-        return (<div className={"error"}>Error found when fetching from API</div>)
-    } else if (isLoaded === false){
-        return(<div>Loading...</div>)
-    } else if (isLoaded === true){
-        const tooHighLatest = tooHighStats[0]
-        const tooLowLatest = tooLowStats[0]
-
-        console.log(tooHighStats)
-        console.log(tooHighLatest)
+        console.log("TooHighStats:", tooHighStats);
+        console.log("TooHighLatest:", tooHighLatest);
 
         return (
             <div>
-                <h3>Dispense Latest Anomaly UUID:</h3>
-                <p>{tooHighLatest.event_id}</p>
-                <p>{tooHighLatest.description}</p>
-                <p>Detected on {tooHighLatest.timestamp}</p>
+                {tooHighLatest ? (
+                    <div>
+                        <h3>Dispense Latest Anomaly UUID:</h3>
+                        <p>{tooHighLatest.event_id}</p>
+                        <p>{tooHighLatest.description}</p>
+                        <p>Detected on {tooHighLatest.timestamp}</p>
+                    </div>
+                ) : (
+                    <p>No recent "Too High" anomalies found.</p>
+                )}
 
-                <h3>Refill Latest Anomaly UUID:</h3>
-                <p>{tooLowLatest.event_id}</p>
-                <p>{tooLowLatest.description}</p>
-                <p>Detected on {tooLowLatest.timestamp}</p>
+                {tooLowLatest ? (
+                    <div>
+                        <h3>Refill Latest Anomaly UUID:</h3>
+                        <p>{tooLowLatest.event_id}</p>
+                        <p>{tooLowLatest.description}</p>
+                        <p>Detected on {tooLowLatest.timestamp}</p>
+                    </div>
+                ) : (
+                    <p>No recent "Too Low" anomalies found.</p>
+                )}
             </div>
-        )
+        );
     }
+
 }

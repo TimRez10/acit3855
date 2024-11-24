@@ -122,7 +122,7 @@ def populate_anomalies(anomaly_list):
 
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    existing_event_ids = {item['event_id'] for item in data}
+    existing_trace_ids = {item['trace_id'] for item in data}
 
     for event in anomaly_list:
         anomaly_item = None
@@ -148,10 +148,10 @@ def populate_anomalies(anomaly_list):
             logger.error(f"Unknown event type: {event['type']}")
             continue
 
-        # Check if the event_id already exists
-        if anomaly_item and anomaly_item['event_id'] not in existing_event_ids:
+        # Check if the trace_id already exists
+        if anomaly_item and anomaly_item['trace_id'] not in existing_trace_ids:
             data.append(anomaly_item)
-            existing_event_ids.add(anomaly_item['event_id'])
+            existing_trace_ids.add(anomaly_item['trace_id'])
             logger.info(f"Anomaly with trace ID {event['payload']['trace_id']} added to list")
         else:
             logger.info(f"Anomaly with trace ID {event['payload']['trace_id']} already exists in the data")
