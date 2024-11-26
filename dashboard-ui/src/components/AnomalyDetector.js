@@ -6,7 +6,7 @@ export default function AnomalyDetector() {
     const [tooHighStats, setTooHighStats] = useState({});
     const [tooLowStats, setTooLowStats] = useState({});
     const [error, setError] = useState(null)
-    const dnsName = process.env.HOST_NAME; // environment variable
+    const dnsName = process.env.REACT_APP_HOSTNAME; // environment variable
 
     const getTooHighStats = () => {
         fetch(`http://${dnsName}:8120/anomalies?anomaly_type=TooHigh`)

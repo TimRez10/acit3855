@@ -124,8 +124,8 @@ services:
     # image: deployment-dashboard
     ports:
     - "3000:3000"
-    env_file:
-      - .env
+    environment:
+      - REACT_APP_HOSTNAME=${HOSTNAME}
     depends_on:
     - processing
     - analyzer

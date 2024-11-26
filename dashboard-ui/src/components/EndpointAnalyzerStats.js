@@ -5,7 +5,7 @@ export default function EndpointAnalyzerStats() {
     const [isLoaded, setIsLoaded] = useState(false);
     const [log, setLog] = useState(null);
     const [error, setError] = useState(null)
-    const dnsName = process.env.HOST_NAME;
+    const dnsName = process.env.REACT_APP_HOSTNAME;
 
     const getAnalyzer = () => {
         fetch(`http://${dnsName}:8110/stats`)

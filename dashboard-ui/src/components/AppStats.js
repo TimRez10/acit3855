@@ -5,7 +5,7 @@ export default function AppStats() {
     const [isLoaded, setIsLoaded] = useState(false);
     const [stats, setStats] = useState({});
     const [error, setError] = useState(null)
-    const dnsName = process.env.HOST_NAME;
+    const dnsName = process.env.REACT_APP_HOSTNAME;
 
 	const getStats = () => {
 
