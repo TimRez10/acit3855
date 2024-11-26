@@ -23,16 +23,16 @@ else:
     app_conf_file = "app_conf.yaml"
     log_conf_file = "log_conf.yaml"
 
+# App Configuration
 with open(app_conf_file, 'r') as f:
     app_config = yaml.safe_load(f.read())
 
-# External Logging Configuration
+# Logging Configuration
 with open(log_conf_file, 'r') as f:
     log_config = yaml.safe_load(f.read())
     logging.config.dictConfig(log_config)
 
 logger = logging.getLogger('basicLogger')
-
 logger.info("App Conf File: %s" % app_conf_file)
 logger.info("Log Conf File: %s" % log_conf_file)
 
@@ -67,22 +67,20 @@ else:
     with open(app_config['datastore']['filename'], "r") as events:
         data = json.load(events)
 
-hostname = "%s:%d" % (app_config["events"]["hostname"], app_config["events"]["port"])
-
 
 # Anomaly Detection Functions
 def check_dispense_anomaly(event):
     """
     Check if a dispense event contains an anomaly based on amount paid.
     """
-    return app_config["anomalies"]["amount_paid_threshold"] < event['amount_paid']
+    return app_config["anomalies"]["amount_paid_threshold"] < event['amount_paid'] # Too High
 
 
 def check_refill_anomaly(event):
     """
     Check if a refill event contains an anomaly based on item quantity.
     """
-    return app_config["anomalies"]["item_quantity_threshold"] > event['item_quantity']
+    return app_config["anomalies"]["item_quantity_threshold"] > event['item_quantity'] # Too Low
 
 anomaly_checks = {
     'dispense': check_dispense_anomaly,
@@ -91,6 +89,39 @@ anomaly_checks = {
 
 
 # Data Processing Functions
+def find_anomalies():
+    """
+    Consume events from Kafka and detect anomalies.
+    """
+    logger.info("Starting anomaly detection process")
+    anomaly_list = []
+
+    try:
+        for msg in consumer:
+            msg_str = msg.value.decode('utf-8')
+            msg = json.loads(msg_str)
+            logger.debug(f"Processing event: {msg}")
+
+            has_anomaly = anomaly_checks[msg['type']](msg['payload'])
+            if has_anomaly:
+                anomaly_list.append(msg)
+                logger.info(f"Detected anomaly in {msg['type']} event")
+    except Exception as e:
+        logger.error(f"Error processing Kafka messages: {e}")
+        return NoContent, 404
+
+    logger.info(f"Detected {len(anomaly_list)} anomalies from Kafka consumer")
+
+    try:
+        logger.info("Storing detected anomalies...")
+        populate_anomalies(anomaly_list)
+    except Exception as e:
+        logger.error(f"Failed to store anomalies: {e}")
+        return e, 400
+
+    logger.info("Successfully completed anomaly detection process")
+
+
 def populate_anomalies(anomaly_list):
     """
     Store detected anomalies in the JSON datastore.
@@ -100,7 +131,6 @@ def populate_anomalies(anomaly_list):
     new_anomalies = 0
 
     for event in anomaly_list:
-        anomaly_item = None
         if event['type'] == 'dispense':
             anomaly_item = {
                 "event_id": str(uuid.uuid4()),
@@ -137,39 +167,6 @@ def populate_anomalies(anomaly_list):
         json.dump(data, events)
 
 
-def find_anomalies():
-    """
-    Consume events from Kafka and detect anomalies.
-    """
-    logger.info("Starting anomaly detection process")
-    anomaly_list = []
-
-    try:
-        for msg in consumer:
-            msg_str = msg.value.decode('utf-8')
-            msg = json.loads(msg_str)
-            logger.debug(f"Processing event: {msg}")
-
-            has_anomaly = anomaly_checks[msg['type']](msg['payload'])
-            if has_anomaly:
-                anomaly_list.append(msg)
-                logger.info(f"Detected anomaly in {msg['type']} event")
-    except Exception as e:
-        logger.error(f"Error processing Kafka messages: {e}")
-        return NoContent, 404
-
-    logger.info(f"Detected {len(anomaly_list)} anomalies from Kafka consumer")
-
-    try:
-        logger.info("Storing detected anomalies...")
-        populate_anomalies(anomaly_list)
-    except Exception as e:
-        logger.error(f"Failed to store anomalies: {e}")
-        return e, 400
-
-    logger.info("Successfully completed anomaly detection process")
-
-
 # Endpoint Function
 def get_anomalies(anomaly_type):
     """
@@ -191,7 +188,6 @@ def get_anomalies(anomaly_type):
 
         logger.info(f"GET /anomalies response: found {len(relevant_anomalies)} {anomaly_type} anomalies")
         return relevant_anomalies, 200
-
     except Exception as e:
         logger.error(f"Error retrieving anomalies: {e}")
         return e, 400
