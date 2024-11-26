@@ -141,24 +141,24 @@ services:
     - processing
     - analyzer
 
-nginx:
-  image: nginx:latest
-  # Connects the conf file of the container to the conf file in our folder
-  volumes:
-    - /user/ubuntu/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-  # It will start up the nginx only when all API containers have started
-  depends_on:
-    - receiver
-    - storage
-    - processing
-    - analyzer
-    - anomaly_detector
-    - dashboard-ui
-  # Connects port 80 of the nginx container to localhost:80
-  ports:
-    - "80:80"
-  networks:
-    - api.network
+  nginx:
+    image: nginx:latest
+    # Connects the conf file of the container to the conf file in our folder
+    volumes:
+      - /user/ubuntu/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    # It will start up the nginx only when all API containers have started
+    depends_on:
+      - receiver
+      - storage
+      - processing
+      - analyzer
+      - anomaly_detector
+      - dashboard-ui
+    # Connects port 80 of the nginx container to localhost:80
+    ports:
+      - "80:80"
+    networks:
+      - api.network
 
 volumes:
   my-db:
