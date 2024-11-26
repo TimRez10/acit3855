@@ -153,7 +153,7 @@ services:
       - processing
       - analyzer
       - anomaly_detector
-      - dashboard-ui
+      - dashboard
     # Connects port 80 of the nginx container to localhost:80
     ports:
       - "80:80"
