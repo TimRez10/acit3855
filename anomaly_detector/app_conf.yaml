@@ -3,6 +3,8 @@ events:
   hostname: ec2-3-93-190-194.compute-1.amazonaws.com
   port: 9092
   topic: events
+  retries: 5
+  sleep_time: 4
 anomalies:
   amount_paid_threshold: 50000
   item_quantity_threshold: 10000

@@ -177,7 +177,8 @@ def get_anomalies(anomaly_type):
     """
     logger.info(f"Processing GET /anomalies request for type: {anomaly_type}")
 
-    find_anomalies()
+    if len(consumer) > 0:
+        find_anomalies()
 
     try:
         with open(app_config['datastore']['filename'], "r") as anomalies:
