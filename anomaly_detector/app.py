@@ -2,9 +2,12 @@ import connexion
 from connexion import NoContent
 import json
 import yaml
+import time
+import sys
 import logging
 import logging.config
 from pykafka import KafkaClient
+from pykafka.common import OffsetType
 import os
 from datetime import datetime
 import uuid
@@ -33,7 +36,39 @@ logger = logging.getLogger('basicLogger')
 logger.info("App Conf File: %s" % app_conf_file)
 logger.info("Log Conf File: %s" % log_conf_file)
 
+### KAFKA CONNECTION ###
 hostname = "%s:%d" % (app_config["events"]["hostname"], app_config["events"]["port"])
+retries = app_config["events"]["retries"]
+retry_count = 0
+while retry_count < retries:
+    try:
+        logger.debug("Attempting to connect to Kafka at %s", hostname)
+        client = KafkaClient(hosts=hostname)
+        logger.debug("Connected to Kafka at %s", hostname)
+        topic = client.topics[str.encode(app_config["events"]["topic"])]
+        consumer = topic.get_simple_consumer(
+            consumer_group=b'event_group',
+            reset_offset_on_start=False,
+            auto_offset_reset=OffsetType.LATEST
+        )
+        break
+    except Exception as e:
+        time.sleep(app_config["events"]["sleep_time"])
+        retry_count += 1
+        logger.error(f"{e}. {retries-retry_count} out of {retries} retries remaining.")
+    if retry_count == retries:
+        logger.info(f"Can't connect to Kafka. Exiting...")
+        sys.exit()
+
+# Read existing data
+if not os.path.isfile(app_config['datastore']['filename']):
+    data = []
+else:
+    with open(app_config['datastore']['filename'], "r") as events:
+        data = json.load(events)
+
+hostname = "%s:%d" % (app_config["events"]["hostname"], app_config["events"]["port"])
+
 
 # Anomaly Detection Functions
 def check_dispense_anomaly(event):
@@ -60,17 +95,9 @@ def populate_anomalies(anomaly_list):
     """
     Store detected anomalies in the JSON datastore.
     """
-    filename = app_config['datastore']['filename']
-
-    # Read existing data
-    if not os.path.isfile(filename):
-        data = []
-    else:
-        with open(filename, "r") as events:
-            data = json.load(events)
-
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     existing_trace_ids = {item['trace_id'] for item in data}
+    new_anomalies = 0
 
     for event in anomaly_list:
         anomaly_item = None
@@ -100,12 +127,13 @@ def populate_anomalies(anomaly_list):
             data.append(anomaly_item)
             existing_trace_ids.add(anomaly_item['trace_id'])
             logger.info(f"Added new anomaly with trace ID {event['payload']['trace_id']}")
+            new_anomalies+=1
         else:
             logger.info(f"Skipped duplicate anomaly with trace ID {event['payload']['trace_id']}")
 
     # Write updated data
-    with open(filename, "w") as events:
-        logger.debug(f"Writing {len(data)} anomalies to {filename}")
+    with open(app_config['datastore']['filename'], "w") as events:
+        logger.info(f"Writing {new_anomalies} new anomalies to {app_config['datastore']['filename']}")
         json.dump(data, events)
 
 
@@ -113,18 +141,6 @@ def find_anomalies():
     """
     Consume events from Kafka and detect anomalies.
     """
-    hostname = "%s:%d" % (app_config["events"]["hostname"], app_config["events"]["port"])
-
-    try:
-        logger.debug(f"Connecting to Kafka at {hostname}")
-        client = KafkaClient(hosts=hostname)
-    except Exception as e:
-        logger.error(f"Failed to connect to Kafka: {e}")
-        return e, 400
-
-    topic = client.topics[str.encode(app_config["events"]["topic"])]
-    consumer = topic.get_simple_consumer(reset_offset_on_start=True, consumer_timeout_ms=1000)
-
     logger.info("Starting anomaly detection process")
     anomaly_list = []
 
