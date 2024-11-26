@@ -126,7 +126,7 @@ def populate_anomalies(anomaly_list):
         if anomaly_item and anomaly_item['trace_id'] not in existing_trace_ids:
             data.append(anomaly_item)
             existing_trace_ids.add(anomaly_item['trace_id'])
-            logger.info(f"Added new {event['payload']['anomaly_type']} anomaly with trace ID {event['payload']['trace_id']}")
+            logger.info(f"Added new {anomaly_item['anomaly_type']} anomaly with trace ID {anomaly_item['trace_id']}")
             new_anomalies+=1
         else:
             logger.info(f"Skipped duplicate {event['payload']['anomaly_type']} anomaly with trace ID {event['payload']['trace_id']}")
@@ -158,7 +158,7 @@ def find_anomalies():
         logger.error(f"Error processing Kafka messages: {e}")
         return NoContent, 404
 
-    logger.info(f"Detected {len(anomaly_list)} anomalies in total")
+    logger.info(f"Detected {len(anomaly_list)} anomalies from Kafka consumer")
 
     try:
         logger.info("Storing detected anomalies...")
@@ -189,7 +189,7 @@ def get_anomalies(anomaly_type):
             reverse=True
         )
 
-        logger.info(f"Found {len(relevant_anomalies)} matching anomalies")
+        logger.info(f"GET /anomalies response: found {len(relevant_anomalies)} {anomaly_type} anomalies")
         return relevant_anomalies, 200
 
     except Exception as e:
