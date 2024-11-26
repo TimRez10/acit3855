@@ -49,6 +49,7 @@ while retry_count < retries:
         consumer = topic.get_simple_consumer(
             consumer_timeout_ms=1000,
             reset_offset_on_start=False,
+            auto_offset_reset=OffsetType.LATEST
         )
         break
     except Exception as e:
@@ -125,10 +126,10 @@ def populate_anomalies(anomaly_list):
         if anomaly_item and anomaly_item['trace_id'] not in existing_trace_ids:
             data.append(anomaly_item)
             existing_trace_ids.add(anomaly_item['trace_id'])
-            logger.info(f"Added new anomaly with trace ID {event['payload']['trace_id']}")
+            logger.info(f"Added new {event['payload']['anomaly_type']} anomaly with trace ID {event['payload']['trace_id']}")
             new_anomalies+=1
         else:
-            logger.info(f"Skipped duplicate anomaly with trace ID {event['payload']['trace_id']}")
+            logger.info(f"Skipped duplicate {event['payload']['anomaly_type']} anomaly with trace ID {event['payload']['trace_id']}")
 
     # Write updated data
     with open(app_config['datastore']['filename'], "w") as events:
@@ -175,9 +176,6 @@ def get_anomalies(anomaly_type):
     Retrieve anomalies of a specific type from the datastore.
     """
     logger.info(f"Processing GET /anomalies request for type: {anomaly_type}")
-
-    logger.debug(consumer)
-
     find_anomalies()
 
     try:
