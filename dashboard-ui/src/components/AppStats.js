@@ -9,7 +9,7 @@ export default function AppStats() {
 
 	const getStats = () => {
 
-        fetch(`http://${dnsName}:8100/stats`)
+        fetch(`http://${dnsName}/processing/stats`)
             .then(res => res.json())
             .then((result)=>{
 				console.log("Received Stats")

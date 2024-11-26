@@ -8,7 +8,7 @@ export default function EndpointAnalyzerStats() {
     const dnsName = process.env.REACT_APP_HOSTNAME;
 
     const getAnalyzer = () => {
-        fetch(`http://${dnsName}:8110/stats`)
+        fetch(`http://${dnsName}/analyzer/stats`)
             .then(res => res.json())
             .then((result)=>{
 				console.log("Received Analyzer Stats")

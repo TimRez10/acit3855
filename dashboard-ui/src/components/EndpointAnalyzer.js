@@ -10,7 +10,7 @@ export default function EndpointAnalyzer(props) {
     const dnsName = process.env.REACT_APP_HOSTNAME;
 
     const getAnalyzer = () => {
-        fetch(`http://${dnsName}:8110/${props.endpoint}?index=${rand_val}`)
+        fetch(`http://${dnsName}/analyzer/${props.endpoint}?index=${rand_val}`)
             .then(res => res.json())
             .then((result)=>{
                 setIndex(rand_val);

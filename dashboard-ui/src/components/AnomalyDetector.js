@@ -9,7 +9,7 @@ export default function AnomalyDetector() {
     const dnsName = process.env.REACT_APP_HOSTNAME; // environment variable
 
     const getTooHighStats = () => {
-        fetch(`http://${dnsName}:8120/anomalies?anomaly_type=TooHigh`)
+        fetch(`http://${dnsName}/anomaly_detector/anomalies?anomaly_type=TooHigh`)
             .then(res => res.json())
             .then((result)=>{
                 console.log("Received Anomalies")
@@ -26,7 +26,7 @@ export default function AnomalyDetector() {
     }, [getTooHighStats]);
 
 	const getTooLowStats = () => {
-        fetch(`http://${dnsName}:8120/anomalies?anomaly_type=TooLow`)
+        fetch(`http://${dnsName}/anomaly_detector/anomalies?anomaly_type=TooLow`)
             .then(res => res.json())
             .then((result)=>{
                 console.log("Received Anomalies")
