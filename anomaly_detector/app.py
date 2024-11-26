@@ -47,9 +47,8 @@ while retry_count < retries:
         logger.debug("Connected to Kafka at %s", hostname)
         topic = client.topics[str.encode(app_config["events"]["topic"])]
         consumer = topic.get_simple_consumer(
-            consumer_group=b'event_group',
+            consumer_timeout_ms=1000,
             reset_offset_on_start=False,
-            auto_offset_reset=OffsetType.LATEST
         )
         break
     except Exception as e:
@@ -177,13 +176,11 @@ def get_anomalies(anomaly_type):
     """
     logger.info(f"Processing GET /anomalies request for type: {anomaly_type}")
 
-    if len(consumer) > 0:
-        find_anomalies()
+    logger.debug(consumer)
+
+    find_anomalies()
 
     try:
-        with open(app_config['datastore']['filename'], "r") as anomalies:
-            data = json.load(anomalies)
-
         relevant_anomalies = [
             anomaly for anomaly in data if anomaly['anomaly_type'] == anomaly_type
         ]
