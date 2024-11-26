@@ -16,36 +16,36 @@ from starlette.middleware.cors import CORSMiddleware
 
 if "TARGET_ENV" in os.environ and os.environ["TARGET_ENV"] == "test":
     print("In Test Environment")
-    app_conf_file = "/config/app_conf.yaml"
-    log_conf_file = "/config/log_conf.yaml"
+    APP_CONF_FILE = "/config/app_conf.yaml"
+    LOG_CONF_FILE = "/config/log_conf.yaml"
 else:
     print("In Dev Environment")
-    app_conf_file = "app_conf.yaml"
-    log_conf_file = "log_conf.yaml"
+    APP_CONF_FILE = "app_conf.yaml"
+    LOG_CONF_FILE = "log_conf.yaml"
 
 # App Configuration
-with open(app_conf_file, 'r') as f:
-    app_config = yaml.safe_load(f.read())
+with open(APP_CONF_FILE, 'r') as f:
+    APP_CONFIG = yaml.safe_load(f.read())
 
 # Logging Configuration
-with open(log_conf_file, 'r') as f:
-    log_config = yaml.safe_load(f.read())
-    logging.config.dictConfig(log_config)
+with open(LOG_CONF_FILE, 'r') as f:
+    LOG_CONFIG = yaml.safe_load(f.read())
+    logging.config.dictConfig(LOG_CONFIG)
 
-logger = logging.getLogger('basicLogger')
-logger.info("App Conf File: %s" % app_conf_file)
-logger.info("Log Conf File: %s" % log_conf_file)
+LOGGER = logging.getLogger('basicLogger')
+LOGGER.info("App Conf File: %s" % APP_CONF_FILE)
+LOGGER.info("Log Conf File: %s" % LOG_CONF_FILE)
 
 ### KAFKA CONNECTION ###
-hostname = "%s:%d" % (app_config["events"]["hostname"], app_config["events"]["port"])
-retries = app_config["events"]["retries"]
+HOSTNAME = "%s:%d" % (APP_CONFIG["events"]["hostname"], APP_CONFIG["events"]["port"])
+RETRIES = APP_CONFIG["events"]["retries"]
 retry_count = 0
-while retry_count < retries:
+while retry_count < RETRIES:
     try:
-        logger.debug("Attempting to connect to Kafka at %s", hostname)
-        client = KafkaClient(hosts=hostname)
-        logger.debug("Connected to Kafka at %s", hostname)
-        topic = client.topics[str.encode(app_config["events"]["topic"])]
+        LOGGER.debug("Attempting to connect to Kafka at %s", HOSTNAME)
+        client = KafkaClient(hosts=HOSTNAME)
+        LOGGER.debug("Connected to Kafka at %s", HOSTNAME)
+        topic = client.topics[str.encode(APP_CONFIG["events"]["topic"])]
         consumer = topic.get_simple_consumer(
             consumer_timeout_ms=1000,
             reset_offset_on_start=False,
@@ -53,18 +53,18 @@ while retry_count < retries:
         )
         break
     except Exception as e:
-        time.sleep(app_config["events"]["sleep_time"])
+        time.sleep(APP_CONFIG["events"]["sleep_time"])
         retry_count += 1
-        logger.error(f"{e}. {retries-retry_count} out of {retries} retries remaining.")
-    if retry_count == retries:
-        logger.info(f"Can't connect to Kafka. Exiting...")
+        LOGGER.error(f"{e}. {RETRIES-retry_count} out of {RETRIES} retries remaining.")
+    if retry_count == RETRIES:
+        LOGGER.info(f"Can't connect to Kafka. Exiting...")
         sys.exit()
 
 # Read existing data
-if not os.path.isfile(app_config['datastore']['filename']):
+if not os.path.isfile(APP_CONFIG['datastore']['filename']):
     data = []
 else:
-    with open(app_config['datastore']['filename'], "r") as events:
+    with open(APP_CONFIG['datastore']['filename'], "r") as events:
         data = json.load(events)
 
 
@@ -73,16 +73,16 @@ def check_dispense_anomaly(event):
     """
     Check if a dispense event contains an anomaly based on amount paid.
     """
-    return app_config["anomalies"]["amount_paid_threshold"] < event['amount_paid'] # Too High
+    return APP_CONFIG["anomalies"]["amount_paid_threshold"] < event['amount_paid'] # Too High
 
 
 def check_refill_anomaly(event):
     """
     Check if a refill event contains an anomaly based on item quantity.
     """
-    return app_config["anomalies"]["item_quantity_threshold"] > event['item_quantity'] # Too Low
+    return APP_CONFIG["anomalies"]["item_quantity_threshold"] > event['item_quantity'] # Too Low
 
-anomaly_checks = {
+ANOMALY_CHECKS = {
     'dispense': check_dispense_anomaly,
     'refill': check_refill_anomaly
 }
@@ -93,33 +93,33 @@ def find_anomalies():
     """
     Consume events from Kafka and detect anomalies.
     """
-    logger.info("Starting anomaly detection process")
+    LOGGER.info("Starting anomaly detection process")
     anomaly_list = []
 
     try:
         for msg in consumer:
             msg_str = msg.value.decode('utf-8')
             msg = json.loads(msg_str)
-            logger.debug(f"Processing event: {msg}")
+            LOGGER.debug(f"Processing event: {msg}")
 
-            has_anomaly = anomaly_checks[msg['type']](msg['payload'])
+            has_anomaly = ANOMALY_CHECKS[msg['type']](msg['payload'])
             if has_anomaly:
                 anomaly_list.append(msg)
-                logger.info(f"Detected anomaly in {msg['type']} event")
+                LOGGER.info(f"Detected anomaly in {msg['type']} event")
     except Exception as e:
-        logger.error(f"Error processing Kafka messages: {e}")
+        LOGGER.error(f"Error processing Kafka messages: {e}")
         return NoContent, 404
 
-    logger.info(f"Detected {len(anomaly_list)} anomalies from Kafka consumer")
+    LOGGER.info(f"Detected {len(anomaly_list)} anomalies from Kafka consumer")
 
     try:
-        logger.info("Storing detected anomalies...")
+        LOGGER.info("Storing detected anomalies...")
         populate_anomalies(anomaly_list)
     except Exception as e:
-        logger.error(f"Failed to store anomalies: {e}")
+        LOGGER.error(f"Failed to store anomalies: {e}")
         return e, 400
 
-    logger.info("Successfully completed anomaly detection process")
+    LOGGER.info("Successfully completed anomaly detection process")
 
 
 def populate_anomalies(anomaly_list):
@@ -137,7 +137,7 @@ def populate_anomalies(anomaly_list):
                 "trace_id": event['payload']['trace_id'],
                 "event_type": "Dispense",
                 "anomaly_type": "TooHigh",
-                "description": f"The value is too high (amount paid of {event['payload']['amount_paid']} is greater than threshold of {app_config['anomalies']['amount_paid_threshold']})",
+                "description": f"The value is too high (amount paid of {event['payload']['amount_paid']} is greater than threshold of {APP_CONFIG['anomalies']['amount_paid_threshold']})",
                 "timestamp": current_time
             }
         elif event['type'] == 'refill':
@@ -146,24 +146,24 @@ def populate_anomalies(anomaly_list):
                 "trace_id": event['payload']['trace_id'],
                 "event_type": "Refill",
                 "anomaly_type": "TooLow",
-                "description": f"The value is too low (item quantity of {event['payload']['item_quantity']} is lower than threshold of {app_config['anomalies']['item_quantity_threshold']})",
+                "description": f"The value is too low (item quantity of {event['payload']['item_quantity']} is lower than threshold of {APP_CONFIG['anomalies']['item_quantity_threshold']})",
                 "timestamp": current_time
             }
         else:
-            logger.error(f"Unknown event type: {event['type']}")
+            LOGGER.error(f"Unknown event type: {event['type']}")
             continue
 
         if anomaly_item and anomaly_item['trace_id'] not in existing_trace_ids:
             data.append(anomaly_item)
             existing_trace_ids.add(anomaly_item['trace_id'])
-            logger.info(f"Added new {anomaly_item['anomaly_type']} anomaly with trace ID {anomaly_item['trace_id']}")
+            LOGGER.info(f"Added new {anomaly_item['anomaly_type']} anomaly with trace ID {anomaly_item['trace_id']}")
             new_anomalies+=1
         else:
-            logger.info(f"Skipped duplicate {anomaly_item['anomaly_type']} anomaly with trace ID {anomaly_item['anomaly_type']}")
+            LOGGER.info(f"Skipped duplicate {anomaly_item['anomaly_type']} anomaly with trace ID {anomaly_item['anomaly_type']}")
 
     # Write updated data
-    with open(app_config['datastore']['filename'], "w") as events:
-        logger.info(f"Writing {new_anomalies} new anomalies to {app_config['datastore']['filename']}")
+    with open(APP_CONFIG['datastore']['filename'], "w") as events:
+        LOGGER.info(f"Writing {new_anomalies} new anomalies to {APP_CONFIG['datastore']['filename']}")
         json.dump(data, events)
 
 
@@ -172,7 +172,7 @@ def get_anomalies(anomaly_type):
     """
     Retrieve anomalies of a specific type from the datastore.
     """
-    logger.info(f"Processing GET /anomalies request for type: {anomaly_type}")
+    LOGGER.info(f"Processing GET /anomalies request for type: {anomaly_type}")
     find_anomalies()
 
     try:
@@ -186,15 +186,15 @@ def get_anomalies(anomaly_type):
             reverse=True
         )
 
-        logger.info(f"GET /anomalies response: found {len(relevant_anomalies)} {anomaly_type} anomalies")
+        LOGGER.info(f"GET /anomalies response: found {len(relevant_anomalies)} {anomaly_type} anomalies")
         return relevant_anomalies, 200
     except Exception as e:
-        logger.error(f"Error retrieving anomalies: {e}")
+        LOGGER.error(f"Error retrieving anomalies: {e}")
         return e, 400
 
 
-logger.info(f"Dispense amount_paid anomaly threshold: {app_config['anomalies']['amount_paid_threshold']}")
-logger.info(f"Refill item_quantity anomaly threshold: {app_config['anomalies']['item_quantity_threshold']}")
+LOGGER.info(f"Dispense amount_paid anomaly threshold: {APP_CONFIG['anomalies']['amount_paid_threshold']}")
+LOGGER.info(f"Refill item_quantity anomaly threshold: {APP_CONFIG['anomalies']['item_quantity_threshold']}")
 
 
 # Application Setup
