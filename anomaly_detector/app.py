@@ -207,7 +207,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.add_api("openapi.yaml", strict_validation=True, validate_responses=True)
 
+app.add_api("openapi.yaml", base_path="/anomaly_detector", strict_validation=True, validate_responses=True)
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8120)
