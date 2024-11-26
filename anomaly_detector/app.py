@@ -129,7 +129,7 @@ def populate_anomalies(anomaly_list):
             logger.info(f"Added new {anomaly_item['anomaly_type']} anomaly with trace ID {anomaly_item['trace_id']}")
             new_anomalies+=1
         else:
-            logger.info(f"Skipped duplicate {event['payload']['anomaly_type']} anomaly with trace ID {event['payload']['trace_id']}")
+            logger.info(f"Skipped duplicate {anomaly_item['anomaly_type']} anomaly with trace ID {anomaly_item['anomaly_type']}")
 
     # Write updated data
     with open(app_config['datastore']['filename'], "w") as events:
