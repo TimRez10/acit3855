@@ -124,6 +124,8 @@ services:
     # image: deployment-dashboard
     ports:
     - "3000:3000"
+    env_file:
+      - .env
     depends_on:
     - processing
     - analyzer

@@ -7,9 +7,10 @@ export default function EndpointAnalyzer(props) {
     const [error, setError] = useState(null)
     const [index, setIndex] = useState(null);
 	const rand_val = Math.floor(Math.random() * 100); // Get a random event from the event store
+    const dnsName = process.env.HOST_NAME;
 
     const getAnalyzer = () => {
-        fetch(`http://ec2-3-93-190-194.compute-1.amazonaws.com:8110/${props.endpoint}?index=${rand_val}`)
+        fetch(`http://${dnsName}:8110/${props.endpoint}?index=${rand_val}`)
             .then(res => res.json())
             .then((result)=>{
                 setIndex(rand_val);

@@ -6,9 +6,10 @@ export default function AnomalyDetector() {
     const [tooHighStats, setTooHighStats] = useState({});
     const [tooLowStats, setTooLowStats] = useState({});
     const [error, setError] = useState(null)
+    const dnsName = process.env.HOST_NAME; // environment variable
 
     const getTooHighStats = () => {
-        fetch(`http://ec2-3-93-190-194.compute-1.amazonaws.com:8120/anomalies?anomaly_type=TooHigh`)
+        fetch(`http://${dnsName}:8120/anomalies?anomaly_type=TooHigh`)
             .then(res => res.json())
             .then((result)=>{
                 console.log("Received Anomalies")
@@ -25,7 +26,7 @@ export default function AnomalyDetector() {
     }, [getTooHighStats]);
 
 	const getTooLowStats = () => {
-        fetch(`http://ec2-3-93-190-194.compute-1.amazonaws.com:8120/anomalies?anomaly_type=TooLow`)
+        fetch(`http://${dnsName}:8120/anomalies?anomaly_type=TooLow`)
             .then(res => res.json())
             .then((result)=>{
                 console.log("Received Anomalies")

@@ -5,10 +5,11 @@ export default function AppStats() {
     const [isLoaded, setIsLoaded] = useState(false);
     const [stats, setStats] = useState({});
     const [error, setError] = useState(null)
+    const dnsName = process.env.HOST_NAME;
 
 	const getStats = () => {
 
-        fetch(`http://ec2-3-93-190-194.compute-1.amazonaws.com:8100/stats`)
+        fetch(`http:/${dnsName}:8100/stats`)
             .then(res => res.json())
             .then((result)=>{
 				console.log("Received Stats")
