@@ -181,6 +181,7 @@ volumes:
   my-db:
   processing-db:
   anomaly-db:
+  final-db:
 
 networks:
   api.network:
