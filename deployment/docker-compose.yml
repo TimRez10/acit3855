@@ -154,6 +154,7 @@ services:
       - analyzer
       - anomaly_detector
       - dashboard
+      - final
     # Connects port 80 of the nginx container to localhost:80
     ports:
       - "80:80"

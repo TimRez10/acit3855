@@ -9,6 +9,7 @@ export default function Final() {
 
     const getAnalyzer = () => {
         setData("Final exam sample")
+        setIsLoaded(true)
         // fetch(`http://${dnsName}/final`)
         //     .then(res => res.json())
         //     .then((result)=>{
