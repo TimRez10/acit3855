@@ -17,6 +17,7 @@ from connexion import NoContent
 from connexion.middleware import MiddlewarePosition
 from pykafka import KafkaClient
 from pykafka.common import OffsetType
+from pykafka.exceptions import UnknownTopicOrPartition
 from starlette.middleware.cors import CORSMiddleware
 
 if "TARGET_ENV" in os.environ and os.environ["TARGET_ENV"] == "test":
@@ -57,7 +58,7 @@ while retry_count < RETRIES:
             auto_offset_reset=OffsetType.LATEST
         )
         break
-    except (ConnectionError, TimeoutError) as e:
+    except (ConnectionError, TimeoutError, UnknownTopicOrPartition) as e:
         time.sleep(APP_CONFIG["events"]["sleep_time"])
         retry_count += 1
         LOGGER.error(f"{e}. {RETRIES-retry_count} out of {RETRIES} retries remaining.")
