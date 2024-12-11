@@ -47,11 +47,11 @@ TIMEOUT = APP_CONFIG['timeout']
 
 # Read datastore and store it in a global variable.
 # This is so I don't have to re-read the file every time the endpoint function is run.
-if not os.path.isfile(APP_CONFIG['datastore']['filename']):
-    data = []
-else:
-    with open(APP_CONFIG['datastore']['filename'], "r", encoding='utf-8') as event_file:
-        data = json.load(event_file)
+# if not os.path.isfile(APP_CONFIG['datastore']['filename']):
+#     data = []
+# else:
+#     with open(APP_CONFIG['datastore']['filename'], "r", encoding='utf-8') as event_file:
+#         data = json.load(event_file)
 
 # Processing functions
 def check_services():
@@ -119,7 +119,8 @@ def check_services():
 def get_checks():
     try:
         if os.path.isfile(APP_CONFIG['datastore']['filename']):
-            return data
+            with open(APP_CONFIG['datastore']['filename'], "r", encoding='utf-8') as event_file:
+                return json.load(event_file)
     except:
         return "File not found", 404
 
