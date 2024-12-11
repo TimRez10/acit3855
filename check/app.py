@@ -71,8 +71,8 @@ def check_services():
     try:
         response = requests.get(STORAGE_URL, timeout=TIMEOUT)
         if response.status_code == 200:
-            storage_json = response.json()
-            storage_status = f"Storage has {storage_json['num_dispense']} Dispenses and {storage_json['num_refill']} Refill events"
+            response = response.json()
+            storage_status = f"Storage has {response['num_dispense']} Dispenses and {response['num_refill']} Refill events"
             LOGGER.info("Storage is Healthy")
         else:
             LOGGER.info("Storage returning non-200 response")
@@ -83,25 +83,25 @@ def check_services():
     try:
         response = requests.get(ANALYZER_URL, timeout=TIMEOUT)
         if response.status_code == 200:
-            storage_json = response.json()
-            storage_status = f"Storage has {storage_json['num_dispense']} Dispenses and {storage_json['num_refill']} Refill events"
-            LOGGER.info("Storage is Healthy")
+            response = response.json()
+            analyzer_status = f"Analyzer has {response['num_dispense']} Dispenses and {response['num_refill']} Refill events"
+            LOGGER.info("Analyzer is Healthy")
         else:
-            LOGGER.info("Storage returning non-200 response")
+            LOGGER.info("Analyzer returning non-200 response")
     except (Timeout, ConnectionError):
-        LOGGER.info("Storage is Not Available")
+        LOGGER.info("Analyzer is Not Available")
 
     processing_status = "Unavailable"
     try:
         response = requests.get(PROCESSING_URL, timeout=TIMEOUT)
         if response.status_code == 200:
-            storage_json = response.json()
-            storage_status = f"Storage has {storage_json['num_dispense_records']} Dispenses and {storage_json['num_refill_records']} Refill events"
-            LOGGER.info("Storage is Healthy")
+            response = response.json()
+            processing_status = f"Processing has {response['num_dispense_records']} Dispenses and {response['num_refill_records']} Refill events"
+            LOGGER.info("Processing is Healthy")
         else:
-            LOGGER.info("Storage returning non-200 response")
+            LOGGER.info("Processing returning non-200 response")
     except (Timeout, ConnectionError):
-        LOGGER.info("Storage is Not Available")
+        LOGGER.info("Processing is Not Available")
 
     data = {
         'receiver': receiver_status,
