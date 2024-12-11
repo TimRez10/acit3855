@@ -47,6 +47,14 @@ paths:
           description: item created
         "400":
           description: "invalid input, object invalid"
+  /check:
+    get:
+      summary: Checks the health of the Receiver
+      operationId: app.get_check
+      description: Service is healthy if this service returns a response
+      responses:
+        '200':
+          description: OK
 components:
   schemas:
     DispenseItem:
@@ -97,4 +105,3 @@ components:
         item_quantity:
           type: number
           example: 3
-        

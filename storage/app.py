@@ -74,6 +74,18 @@ while retry_count < retries:
         logger.info(f"Can't connect to Kafka. Exiting...")
         sys.exit()
 
+
+def get_event_stats():
+    session = DB_SESSION()
+
+    num_dispense = session.query(DispenseItem).count()
+    num_refill = session.query(RefillItem).count()
+
+    session.close()
+
+    return {'num_dispense': num_dispense, 'num_refill': num_refill}, 200
+
+
 def add_dispense_record(body):
     """ Receives a dispense record """
     data=body

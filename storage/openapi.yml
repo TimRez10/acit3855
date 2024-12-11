@@ -11,13 +11,25 @@ tags:
 - name: vending_machine
   description: Operations available to vending machines
 paths:
+  /stats:
+    get:
+      summary: gets the event stats
+      operationId: app.get_event_stats
+      description: Gets the stats of the history events
+      responses:
+        '200':
+          description: Successfully returned a heart rate event
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stats'
   /dispenses:
     get:
       tags:
       - vending_machine
       summary: gets dispensed items records
       operationId: app.get_dispense_record
-      parameters: 
+      parameters:
         - name: start_timestamp
           in: query
           description: Limits the number of records returned
@@ -35,7 +47,7 @@ paths:
       responses:
         '200':
           description: Successfully returned a list of dispense events
-          content: 
+          content:
             application/json:
               schema:
                 type: array
@@ -58,7 +70,7 @@ paths:
       - vending_machine
       summary: gets refill items records
       operationId: app.get_refill_record
-      parameters: 
+      parameters:
         - name: start_timestamp
           in: query
           description: Limits the number of records returned
@@ -76,7 +88,7 @@ paths:
       responses:
         '200':
           description: Successfully returned a list of refill events
-          content: 
+          content:
             application/json:
               schema:
                 type: array
@@ -150,4 +162,14 @@ components:
         trace_id:
           type: string
           format: uuid
-        
+    Stats:
+      required:
+      - num_dispense
+      - num_refill
+      properties:
+        num_dispense:
+          type: integer
+          example: 100
+        num_refill:
+          type: integer
+          example: 100

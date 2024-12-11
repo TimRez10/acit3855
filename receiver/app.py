@@ -54,6 +54,8 @@ while retry_count < retries:
         logger.info(f"Can't connect to Kafka. Exiting...")
         sys.exit()
 
+def get_check():
+    return NoContent, 200
 
 def add_dispense_record(body):
     trace_id = str(uuid.uuid4())

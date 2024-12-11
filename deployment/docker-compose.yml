@@ -154,17 +154,17 @@ services:
       - analyzer
       - anomaly_detector
       - dashboard
-      - final
+      - check
     # Connects port 80 of the nginx container to localhost:80
     ports:
       - "80:80"
     networks:
       - api.network
 
-  final:
+  check:
     build:
-      context: ../final
-    # image: deployment-final
+      context: ../check
+    # image: deployment-check
     ports:
       - "8130"
     networks:
@@ -172,9 +172,9 @@ services:
     environment:
       - TARGET_ENV=test
     volumes:
-      - /home/ubuntu/config/final:/config
+      - /home/ubuntu/config/check:/config
       - /home/ubuntu/logs:/logs
-      - final-db:/data
+      - check-db:/data
     depends_on:
       - kafka
 
@@ -182,7 +182,7 @@ volumes:
   my-db:
   processing-db:
   anomaly-db:
-  final-db:
+  check-db:
 
 networks:
   api.network:

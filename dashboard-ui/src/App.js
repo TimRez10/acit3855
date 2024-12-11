@@ -5,7 +5,7 @@ import EndpointAnalyzer from './components/EndpointAnalyzer'
 import EndpointAnalyzerStats from './components/EndpointAnalyzerStats'
 import AppStats from './components/AppStats'
 import AnomalyDetector from './components/AnomalyDetector'
-import Final from './components/Final'
+// import Final from './components/Final'
 
 function App() {
 
@@ -26,8 +26,8 @@ function App() {
                 <EndpointAnalyzerStats/>
                 <h1>Anomalies</h1>
                 <AnomalyDetector/>
-                <h1>Final</h1>
-                <Final/>
+                {/* <h1>Final</h1>
+                <Final/> */}
             </div>
         </div>
     );
