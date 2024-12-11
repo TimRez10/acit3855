@@ -1,26 +1,27 @@
 import React, { useEffect, useState } from 'react'
 import '../App.css';
 
-export default function EndpointAnalyzerStats() {
+export default function Final() {
     const [isLoaded, setIsLoaded] = useState(false);
     const [data, setData] = useState(null);
     const [error, setError] = useState(null)
     const dnsName = process.env.REACT_APP_HOSTNAME;
 
-    // const getAnalyzer = () => {
-    //     fetch(`http://${dnsName}/final`)
-    //         .then(res => res.json())
-    //         .then((result)=>{
-	// 			console.log("Received Final Stats")
-    //             setData(result);
-    //             setIsLoaded(true);
-    //         },(error) =>{
-    //             setError(error)
-    //             setIsLoaded(true);
-    //         })
-    // }
+    const getAnalyzer = () => {
+        setData("Final exam sample")
+        // fetch(`http://${dnsName}/final`)
+        //     .then(res => res.json())
+        //     .then((result)=>{
+		// 		console.log("Received Final Stats")
+        //         setData(result);
+        //         setIsLoaded(true);
+        //     },(error) =>{
+        //         setError(error)
+        //         setIsLoaded(true);
+        //     })
+    }
 
-    setData("Final exam sample")
+
 
 
 	useEffect(() => {
