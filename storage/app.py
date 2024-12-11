@@ -83,7 +83,8 @@ def get_event_stats():
 
     session.close()
 
-    return {'num_dispense': num_dispense, 'num_refill': num_refill}, 200
+    return {'num_dispense': num_dispense,
+            'num_refill': num_refill}, 200
 
 
 def add_dispense_record(body):

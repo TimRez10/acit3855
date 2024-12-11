@@ -1,7 +1,7 @@
 version: 1
 formatters:
   simple:
-    format: '%(asctime)s - anomaly_detector - %(levelname)s - %(message)s'
+    format: '%(asctime)s - check - %(levelname)s - %(message)s'
 handlers:
   console:
     class: logging.StreamHandler
