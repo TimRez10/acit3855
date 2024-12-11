@@ -175,8 +175,6 @@ services:
       - /home/ubuntu/config/check:/config
       - /home/ubuntu/logs:/logs
       - check-db:/data
-    depends_on:
-      - kafka
 
 volumes:
   my-db:

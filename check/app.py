@@ -45,14 +45,6 @@ PROCESSING_URL = APP_CONFIG['url']['processing']
 ANALYZER_URL = APP_CONFIG['url']['analyzer']
 TIMEOUT = APP_CONFIG['timeout']
 
-# Read datastore and store it in a global variable.
-# This is so I don't have to re-read the file every time the endpoint function is run.
-# if not os.path.isfile(APP_CONFIG['datastore']['filename']):
-#     data = []
-# else:
-#     with open(APP_CONFIG['datastore']['filename'], "r", encoding='utf-8') as event_file:
-#         data = json.load(event_file)
-
 # Processing functions
 def check_services():
     """ Called periodically """
