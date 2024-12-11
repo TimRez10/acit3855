@@ -4,8 +4,6 @@ Final exam service
 
 import json
 import os
-import sys
-import time
 import logging
 import logging.config
 
@@ -15,9 +13,6 @@ import yaml
 import connexion
 from connexion import NoContent
 from connexion.middleware import MiddlewarePosition
-from pykafka import KafkaClient
-from pykafka.common import OffsetType
-from pykafka.exceptions import UnknownTopicOrPartition
 from starlette.middleware.cors import CORSMiddleware
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -49,31 +44,6 @@ STORAGE_URL = APP_CONFIG['url']['storage']
 PROCESSING_URL = APP_CONFIG['url']['processing']
 ANALYZER_URL = APP_CONFIG['url']['analyzer']
 TIMEOUT = APP_CONFIG['timeout']
-
-
-### KAFKA CONNECTION ###
-HOSTNAME = f"{APP_CONFIG['events']['hostname']}:{APP_CONFIG['events']['port']}"
-RETRIES = APP_CONFIG["events"]["retries"]
-retry_count = 0
-while retry_count < RETRIES:
-    try:
-        LOGGER.debug(f"Attempting to connect to Kafka at {HOSTNAME}")
-        client = KafkaClient(hosts=HOSTNAME)
-        LOGGER.debug(f"Connected to Kafka at {HOSTNAME}")
-        topic = client.topics[str.encode(APP_CONFIG["events"]["topic"])]
-        consumer = topic.get_simple_consumer(
-            consumer_timeout_ms=1000,
-            reset_offset_on_start=False,
-            auto_offset_reset=OffsetType.LATEST
-        )
-        break
-    except (ConnectionError, TimeoutError, UnknownTopicOrPartition) as e:
-        time.sleep(APP_CONFIG["events"]["sleep_time"])
-        retry_count += 1
-        LOGGER.error(f"{e}. {RETRIES-retry_count} out of {RETRIES} retries remaining.")
-    if retry_count == RETRIES:
-        LOGGER.info("Can't connect to Kafka. Exiting...")
-        sys.exit()
 
 # Read datastore and store it in a global variable.
 # This is so I don't have to re-read the file every time the endpoint function is run.
