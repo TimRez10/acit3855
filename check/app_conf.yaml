@@ -1,17 +1,11 @@
 version: 1
-events:
-  hostname: ec2-3-93-82-151.compute-1.amazonaws.com
-  port: 9092
-  topic: events
-  retries: 5
-  sleep_time: 4
 datastore:
   filename: /data/status.json
 url:
-  receiver: http://ec2-3-93-82-151.compute-1.amazonaws.com/receiver
-  storage: http://ec2-3-93-82-151.compute-1.amazonaws.com/storage
-  analyzer: http://ec2-3-93-82-151.compute-1.amazonaws.com/analyzer
-  processing: http://ec2-3-93-82-151.compute-1.amazonaws.com/processing
+  receiver: http://ec2-3-93-82-151.compute-1.amazonaws.com/receiver/stats
+  storage: http://ec2-3-93-82-151.compute-1.amazonaws.com/storage/stats
+  analyzer: http://ec2-3-93-82-151.compute-1.amazonaws.com/analyzer/stats
+  processing: http://ec2-3-93-82-151.compute-1.amazonaws.com/processing/stats
 timeout: 2
 scheduler:
   period_sec: 10
