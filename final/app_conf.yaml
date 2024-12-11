@@ -1,0 +1,9 @@
+version: 1
+events:
+  hostname: ...
+  port: 9092
+  topic: events
+  retries: 5
+  sleep_time: 4
+datastore:
+  filename: /data/final.json

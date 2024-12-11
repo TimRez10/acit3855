@@ -69,7 +69,8 @@ while retry_count < RETRIES:
         LOGGER.info("Can't connect to Kafka. Exiting...")
         sys.exit()
 
-# Read existing data
+# Read datastore and store it in a global variable.
+# This is so I don't have to re-read the file every time the populate_anomalies function is run.
 if not os.path.isfile(APP_CONFIG['datastore']['filename']):
     data = []
 else:
@@ -84,13 +85,11 @@ def check_dispense_anomaly(event):
     """
     return APP_CONFIG["anomalies"]["amount_paid_threshold"] < event['amount_paid']  # Too High
 
-
 def check_refill_anomaly(event):
     """
     Check if a refill event contains an anomaly based on item quantity.
     """
     return APP_CONFIG["anomalies"]["item_quantity_threshold"] > event['item_quantity']  # Too Low
-
 
 ANOMALY_CHECKS = {
     'dispense': check_dispense_anomaly,
@@ -208,10 +207,8 @@ def get_anomalies(anomaly_type):
         return [], 400
 
 
-LOGGER.info(
-    f"Dispense amount_paid anomaly threshold: {APP_CONFIG['anomalies']['amount_paid_threshold']}")
-LOGGER.info(
-    f"Refill item_quantity anomaly threshold: {APP_CONFIG['anomalies']['item_quantity_threshold']}")
+LOGGER.info(f"Dispense amount_paid anomaly threshold: {APP_CONFIG['anomalies']['amount_paid_threshold']}")
+LOGGER.info(f"Refill item_quantity anomaly threshold: {APP_CONFIG['anomalies']['item_quantity_threshold']}")
 
 
 # Application Setup
@@ -224,7 +221,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 app.add_api(
     "openapi.yaml",
     base_path="/anomaly_detector",

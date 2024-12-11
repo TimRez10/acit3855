@@ -160,6 +160,23 @@ services:
     networks:
       - api.network
 
+  final:
+    build:
+      context: ../final
+    # image: deployment-final
+    ports:
+      - "8130"
+    networks:
+      - "api.network"
+    environment:
+      - TARGET_ENV=test
+    volumes:
+      - /home/ubuntu/config/final:/config
+      - /home/ubuntu/logs:/logs
+      - final-db:/data
+    depends_on:
+      - kafka
+
 volumes:
   my-db:
   processing-db:

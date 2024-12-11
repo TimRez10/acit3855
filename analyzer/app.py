@@ -44,7 +44,7 @@ def get_refill_record(index):
     topic = client.topics[str.encode(app_config["events"]["topic"])]
     consumer = topic.get_simple_consumer(reset_offset_on_start=True,
     consumer_timeout_ms=1000)
-    logger.info("Retrieving BP at index %d" % index)
+    logger.info("Retrieving refill at index %d" % index)
     try:
         events = []
         for msg in consumer:
